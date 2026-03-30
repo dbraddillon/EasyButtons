@@ -91,6 +91,7 @@ public class ButtonGestureBehavior : Behavior<Microsoft.Maui.Controls.View>
     {
         private readonly ButtonGestureBehavior _b;
         public Listener(ButtonGestureBehavior b) => _b = b;
+        public override bool OnDown(MotionEvent e)         => true; // must return true or UP never arrives
         public override bool OnSingleTapUp(MotionEvent e) { _b.FireTap(); return true; }
         public override void OnLongPress(MotionEvent e)   => _b.FireLongPress();
     }
