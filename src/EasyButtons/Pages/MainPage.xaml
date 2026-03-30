@@ -98,9 +98,9 @@
             </CollectionView>
         </ScrollView>
 
-        <!-- FAB -->
+        <!-- FAB — overlays content in Row 0 -->
         <Button
-            Grid.Row="1"
+            Grid.Row="0"
             Text="+"
             FontSize="32"
             FontAttributes="Bold"
