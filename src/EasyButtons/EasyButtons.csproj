@@ -26,4 +26,14 @@
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.android" Version="2.1.11" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
 	</ItemGroup>
+	<!-- Prevent resizetizer from overwriting our custom adaptive icon XMLs -->
+	<Target Name="_RemoveResizetzerAdaptiveIconXml"
+	        AfterTargets="_MauiResizetizer"
+	        Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<ItemGroup>
+			<AndroidResource Remove="$(IntermediateOutputPath)resizetizer\r\mipmap-anydpi-v26\appicon.xml" />
+			<AndroidResource Remove="$(IntermediateOutputPath)resizetizer\r\mipmap-anydpi-v26\appicon_round.xml" />
+		</ItemGroup>
+	</Target>
+
 </Project>
