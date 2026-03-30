@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 1024px; height: 500px;
+  background: #0f0f0f;
+  overflow: hidden;
+  font-family: 'Arial Black', Impact, sans-serif;
+}
+
+/* Subtle grid texture */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.layout {
+  position: relative;
+  width: 1024px; height: 500px;
+  display: flex;
+  align-items: center;
+}
+
+/* Left text area */
+.text-side {
+  flex: 0 0 420px;
+  padding: 0 0 0 64px;
+  z-index: 10;
+}
+
+.app-name {
+  font-size: 62px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.app-name span {
+  color: #ef4444;
+}
+
+.tagline {
+  margin-top: 16px;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #888;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+
+.pills {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  color: #aaa;
+  font-weight: 500;
+}
+.pill-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Right buttons area */
+.buttons-side {
+  flex: 1;
+  position: relative;
+  height: 500px;
+}
+
+/* Individual button positioning */
+.btn {
+  position: absolute;
+}
+
+/* ── Shared dome styles ── */
+.shadow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.7) 0%, transparent 65%);
+}
+.rim {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #484848 0%, #282828 50%, #181818 100%);
+}
+.dome {
+  position: absolute;
+  border-radius: 50%;
+}
+.gloss {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 46% 22%,
+    rgba(255,255,255,0.48) 0%,
+    rgba(255,255,255,0.15) 42%,
+    rgba(255,255,255,0) 68%);
+}
+.spec {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse,
+    rgba(255,255,255,0.75) 0%,
+    rgba(255,255,255,0.2) 50%,
+    transparent 75%);
+}
+.dome-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-weight: 900;
+  color: rgba(255,255,255,0.92);
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  line-height: 1.2;
+}
+
+/* ── Button factory mixin via CSS vars ── */
+.make-btn {
+  --s: 150px; /* dome size */
+}
+
+/* RED — top left in the buttons area */
+.b1 { left: 20px; top: 20px; width: 170px; height: 190px; }
+.b1 .shadow { width: 160px; height: 28px; bottom: 14px; left: 5px; }
+.b1 .rim    { width: 164px; height: 164px; top: 8px; left: 3px; }
+.b1 .dome   { width: 150px; height: 150px; top: 12px; left: 10px;
+  background: radial-gradient(circle at 36% 28%, #ff8888 0%, #f03030 18%, #e02020 35%, #c01818 58%, #8b0000 100%); }
+.b1 .gloss  { width: 88px; height: 44px; top: 22px; left: 22px; }
+.b1 .spec   { width: 38px; height: 18px; top: 20px; left: 36px; }
+.b1 .dome-label { width: 150px; height: 150px; top: 12px; left: 10px; font-size: 18px; padding-top: 28px; }
+
+/* BLUE — top right */
+.b2 { left: 210px; top: 0px; width: 170px; height: 190px; }
+.b2 .shadow { width: 160px; height: 28px; bottom: 14px; left: 5px; }
+.b2 .rim    { width: 164px; height: 164px; top: 8px; left: 3px; }
+.b2 .dome   { width: 150px; height: 150px; top: 12px; left: 10px;
+  background: radial-gradient(circle at 36% 28%, #88bbff 0%, #3b82f6 18%, #2563eb 35%, #1d4ed8 58%, #1e3a8a 100%); }
+.b2 .gloss  { width: 88px; height: 44px; top: 22px; left: 22px; }
+.b2 .spec   { width: 38px; height: 18px; top: 20px; left: 36px; }
+.b2 .dome-label { width: 150px; height: 150px; top: 12px; left: 10px; font-size: 18px; padding-top: 28px; }
+
+/* GREEN — bottom left */
+.b3 { left: 40px; top: 200px; width: 170px; height: 190px; }
+.b3 .shadow { width: 160px; height: 28px; bottom: 14px; left: 5px; }
+.b3 .rim    { width: 164px; height: 164px; top: 8px; left: 3px; }
+.b3 .dome   { width: 150px; height: 150px; top: 12px; left: 10px;
+  background: radial-gradient(circle at 36% 28%, #88ffb0 0%, #22c55e 18%, #16a34a 35%, #15803d 58%, #14532d 100%); }
+.b3 .gloss  { width: 88px; height: 44px; top: 22px; left: 22px; }
+.b3 .spec   { width: 38px; height: 18px; top: 20px; left: 36px; }
+.b3 .dome-label { width: 150px; height: 150px; top: 12px; left: 10px; font-size: 17px; padding-top: 28px; }
+
+/* ORANGE — bottom right */
+.b4 { left: 220px; top: 210px; width: 170px; height: 190px; }
+.b4 .shadow { width: 160px; height: 28px; bottom: 14px; left: 5px; }
+.b4 .rim    { width: 164px; height: 164px; top: 8px; left: 3px; }
+.b4 .dome   { width: 150px; height: 150px; top: 12px; left: 10px;
+  background: radial-gradient(circle at 36% 28%, #ffc080 0%, #f97316 18%, #ea6c0a 35%, #c2570a 58%, #7c3200 100%); }
+.b4 .gloss  { width: 88px; height: 44px; top: 22px; left: 22px; }
+.b4 .spec   { width: 38px; height: 18px; top: 20px; left: 36px; }
+.b4 .dome-label { width: 150px; height: 150px; top: 12px; left: 10px; font-size: 17px; padding-top: 28px; }
+
+/* Fade gradient on right edge */
+.fade-right {
+  position: absolute;
+  top: 0; right: 0;
+  width: 80px; height: 500px;
+  background: linear-gradient(to right, transparent, #0f0f0f);
+  z-index: 5;
+}
+/* Fade gradient on left of buttons area */
+.fade-left {
+  position: absolute;
+  top: 0; left: 0;
+  width: 40px; height: 500px;
+  background: linear-gradient(to left, transparent, #0f0f0f);
+  z-index: 5;
+}
+</style>
+</head>
+<body>
+  <div class="layout">
+    <div class="text-side">
+      <div class="app-name">Easy<span>Buttons</span></div>
+      <div class="tagline">One tap.<br>Launch anything.</div>
+      <div class="pills">
+        <div class="pill"><div class="pill-dot" style="background:#ef4444"></div>Apps, websites, calls, maps</div>
+        <div class="pill"><div class="pill-dot" style="background:#3b82f6"></div>Custom colors &amp; labels</div>
+        <div class="pill"><div class="pill-dot" style="background:#22c55e"></div>Pro: unlimited + custom sounds</div>
+      </div>
+    </div>
+
+    <div class="buttons-side">
+      <div class="fade-left"></div>
+
+      <div class="btn b1">
+        <div class="shadow"></div>
+        <div class="rim"></div>
+        <div class="dome"></div>
+        <div class="gloss"></div>
+        <div class="spec"></div>
+        <div class="dome-label">VR<br>Workout</div>
+      </div>
+
+      <div class="btn b2">
+        <div class="shadow"></div>
+        <div class="rim"></div>
+        <div class="dome"></div>
+        <div class="gloss"></div>
+        <div class="spec"></div>
+        <div class="dome-label">Leg Day</div>
+      </div>
+
+      <div class="btn b3">
+        <div class="shadow"></div>
+        <div class="rim"></div>
+        <div class="dome"></div>
+        <div class="gloss"></div>
+        <div class="spec"></div>
+        <div class="dome-label">Healthy<br>Meal</div>
+      </div>
+
+      <div class="btn b4">
+        <div class="shadow"></div>
+        <div class="rim"></div>
+        <div class="dome"></div>
+        <div class="gloss"></div>
+        <div class="spec"></div>
+        <div class="dome-label">Fast Food</div>
+      </div>
+
+      <div class="fade-right"></div>
+    </div>
+  </div>
+</body>
+</html>

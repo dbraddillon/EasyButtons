@@ -1,0 +1,31 @@
+EasyButtons turns anything you launch repeatedly into a giant, satisfying button you can tap in one shot.
+
+No menus. No searching. No fumbling. Just big, bold, colorful dome buttons — tap one and you're there.
+
+── WHAT IT DOES ──
+
+Each button is a shortcut to anything your phone can open:
+• Apps — launch any installed app directly
+• Websites — open a URL in your browser
+• Phone calls — dial a contact instantly
+• SMS — open a message thread
+• Navigation — jump straight to a Maps destination
+• Custom URI schemes — trigger any deep link or app action
+
+Arrange as many buttons as you want, pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+
+── WHY EASY BUTTONS ──
+
+Inspired by the classic "That was easy" button — the idea that some things should just be one press. Quick habits, frequent destinations, shortcuts you use every day. Stop digging through app drawers and just press the button.
+
+── PRO ──
+
+EasyButtons Pro unlocks:
+• Unlimited buttons (free tier: 4 buttons)
+• Custom sounds — assign any audio file to any button
+
+One-time purchase. No subscription, ever.
+
+── BACKUP & RESTORE ──
+
+Export all your buttons to a JSON file anytime. Import them back on any device or after a reinstall. Your setup is always safe.

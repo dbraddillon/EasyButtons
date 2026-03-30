@@ -1,0 +1,1 @@
+Initial release — create big colorful buttons that launch any app, website, or URI in one tap. Long-press to edit. Export/import backup included.

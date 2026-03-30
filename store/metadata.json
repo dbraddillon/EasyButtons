@@ -1,0 +1,18 @@
+{
+  "packageName": "com.voluntarytransactions.easybuttons",
+  "defaultLanguage": "en-US",
+  "category": "TOOLS",
+  "tags": ["launcher", "shortcuts", "productivity", "buttons", "quick launch"],
+  "contactEmail": "voluntarytransactions@gmail.com",
+  "contactWebsite": "https://voluntarytransactions.com",
+  "privacyPolicyUrl": "https://voluntarytransactions.com/easybuttons-privacy-policy.html",
+  "iapProducts": [
+    {
+      "sku": "com.voluntarytransactions.easybuttons.pro",
+      "type": "one_time",
+      "price": 1.99,
+      "title": "EasyButtons Pro",
+      "description": "Unlimited buttons + custom sounds. One-time purchase, no subscription."
+    }
+  ]
+}

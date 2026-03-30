@@ -18,6 +18,9 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
     public bool IsEmpty       => Buttons.Count == 0;
     public bool IsAtFreeLimit => !pro.IsPro && Buttons.Count >= ProService.FreeButtonLimit;
 
+    // Called by MainPage code-behind after debug Pro toggle
+    public void NotifyProChanged() => OnPropertyChanged(nameof(IsAtFreeLimit));
+
     [RelayCommand]
     public async Task LoadAsync()
     {

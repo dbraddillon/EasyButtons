@@ -204,11 +204,22 @@
                    TextColor="#CCCCCC" FontSize="12" />
         </Border>
 
-        <!-- Debug banner -->
-        <Label x:Name="DebugBanner" Grid.Row="1"
-               IsVisible="False" Text="DEBUG BUILD"
-               HorizontalTextAlignment="Center"
-               BackgroundColor="#E65C00" TextColor="White"
-               FontSize="11" FontAttributes="Bold" Padding="0,5" />
+        <!-- Debug bar: banner + Pro toggle (compile-time zero footprint in Release) -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+            <Label x:Name="DebugBanner"
+                   IsVisible="False" Text="DEBUG BUILD"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center"
+                   BackgroundColor="#E65C00" TextColor="White"
+                   FontSize="11" FontAttributes="Bold" Padding="0,5" />
+            <Button x:Name="DebugProButton"
+                    Grid.Column="1"
+                    IsVisible="False"
+                    Text="Pro: OFF"
+                    FontSize="11" FontAttributes="Bold"
+                    BackgroundColor="#333" TextColor="#FFD700"
+                    Padding="12,5" HeightRequest="32"
+                    CornerRadius="0" />
+        </Grid>
     </Grid>
 </ContentPage>
