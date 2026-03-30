@@ -11,6 +11,15 @@
     Title="EasyButtons"
     BackgroundColor="#111111">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Export Backup"
+                     Command="{Binding ExportBackupCommand}"
+                     Order="Secondary" />
+        <ToolbarItem Text="Import Backup"
+                     Command="{Binding ImportBackupCommand}"
+                     Order="Secondary" />
+    </ContentPage.ToolbarItems>
+
     <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="PageBg">#111111</Color>

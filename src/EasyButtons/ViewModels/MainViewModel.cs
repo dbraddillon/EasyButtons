@@ -8,7 +8,7 @@ using EasyButtons.Helpers;
 
 namespace EasyButtons.ViewModels;
 
-public partial class MainViewModel(EasyButtonRepository repo, ProService pro) : BaseViewModel
+public partial class MainViewModel(EasyButtonRepository repo, ProService pro, BackupService backup) : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
@@ -67,5 +67,32 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro) : 
         var ok = await pro.PurchaseAsync();
         if (!ok)
             await Shell.Current.DisplayAlertAsync("Coming Soon", "Pro purchase will be available in the next update.", "OK");
+    }
+
+    [RelayCommand]
+    private async Task ExportBackupAsync()
+    {
+        await backup.ExportAsync();
+    }
+
+    [RelayCommand]
+    private async Task ImportBackupAsync()
+    {
+        var confirmed = await Shell.Current.DisplayAlertAsync(
+            "Import Backup",
+            "This will replace all your current buttons with the backup. Continue?",
+            "Import", "Cancel");
+        if (!confirmed) return;
+
+        var count = await backup.ImportAsync();
+        if (count < 0)
+            await Shell.Current.DisplayAlertAsync("Error", "Could not read the backup file.", "OK");
+        else if (count == 0)
+            await Shell.Current.DisplayAlertAsync("Empty", "No buttons found in the backup.", "OK");
+        else
+        {
+            await LoadAsync();
+            await Shell.Current.DisplayAlertAsync("Done", $"{count} button{(count == 1 ? "" : "s")} restored.", "OK");
+        }
     }
 }

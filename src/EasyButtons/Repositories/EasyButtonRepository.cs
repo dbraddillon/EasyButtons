@@ -30,4 +30,13 @@ public class EasyButtonRepository(DatabaseContext db)
         var conn = await db.GetConnectionAsync();
         await conn.DeleteAsync<EasyButton>(id);
     }
+
+    /// <summary>Replace all buttons with the imported list.</summary>
+    public async Task ReplaceAllAsync(IEnumerable<EasyButton> buttons)
+    {
+        var conn = await db.GetConnectionAsync();
+        await conn.DeleteAllAsync<EasyButton>();
+        foreach (var b in buttons)
+            await conn.InsertAsync(b);
+    }
 }
