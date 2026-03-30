@@ -9,15 +9,26 @@ namespace EasyButtons.Helpers;
 
 public static class LaunchHelper
 {
-    public static async Task<bool> TryLaunchAsync(string uri)
+    public static Task<bool> TryLaunchAsync(string uri)
     {
         try
         {
-            return await Launcher.Default.TryOpenAsync(uri);
+#if ANDROID
+            // Use native intent directly — MAUI Launcher can fail for http/https URIs
+            // that require Android to pick between browser and installed apps (e.g. Spotify)
+            var intent = new Android.Content.Intent(
+                Android.Content.Intent.ActionView,
+                Android.Net.Uri.Parse(uri));
+            intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+            Android.App.Application.Context.StartActivity(intent);
+            return Task.FromResult(true);
+#else
+            return Launcher.Default.TryOpenAsync(uri);
+#endif
         }
         catch
         {
-            return false;
+            return Task.FromResult(false);
         }
     }
 

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="EasyButtons.Pages.MainPage"
+    x:Name="ThisPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:EasyButtons.ViewModels"
     xmlns:m="clr-namespace:EasyButtons.Models"
+    xmlns:helpers="clr-namespace:EasyButtons.Helpers"
     x:DataType="vm:MainViewModel"
     Title="EasyButtons"
     BackgroundColor="#111111">
@@ -48,26 +50,24 @@
                     <DataTemplate x:DataType="m:EasyButton">
                         <!-- Big round Easy Button -->
                         <Grid Padding="4">
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.LaunchCommand}"
-                                    CommandParameter="{Binding .}" />
-                                <TapGestureRecognizer
-                                    NumberOfTapsRequired="2"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
-                                    CommandParameter="{Binding .}" />
-                            </Grid.GestureRecognizers>
+                            <Grid.Behaviors>
+                                <helpers:ButtonGestureBehavior
+                                    TapCommand="{Binding Source={x:Reference ThisPage}, Path=BindingContext.LaunchCommand}"
+                                    TapCommandParameter="{Binding .}"
+                                    LongPressCommand="{Binding Source={x:Reference ThisPage}, Path=BindingContext.EditCommand}"
+                                    LongPressCommandParameter="{Binding .}" />
+                            </Grid.Behaviors>
 
-                            <!-- Shadow/base layer -->
+                            <!-- Drop shadow — larger + deeper offset gives the dome its lift -->
                             <BoxView
                                 CornerRadius="80"
-                                HeightRequest="140"
-                                WidthRequest="140"
+                                HeightRequest="150"
+                                WidthRequest="150"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center"
-                                Margin="0,6,0,0"
+                                Margin="0,14,0,0"
                                 Color="#000000"
-                                Opacity="0.4" />
+                                Opacity="0.55" />
 
                             <!-- Button dome -->
                             <Border
@@ -75,22 +75,41 @@
                                 WidthRequest="140"
                                 StrokeShape="Ellipse"
                                 StrokeThickness="0"
-                                BackgroundColor="{Binding Color}"
+                                BackgroundColor="{Binding Color, Converter={StaticResource HexToColorConverter}}"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center">
                                 <Border.Shadow>
                                     <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.5" />
                                 </Border.Shadow>
-                                <Label
-                                    Text="{Binding Label}"
-                                    FontSize="17"
-                                    FontAttributes="Bold"
-                                    TextColor="White"
-                                    HorizontalTextAlignment="Center"
-                                    VerticalTextAlignment="Center"
-                                    LineBreakMode="WordWrap"
-                                    MaxLines="3"
-                                    Padding="14,0" />
+                                <Grid>
+                                    <Label
+                                        Text="{Binding Label}"
+                                        FontSize="17"
+                                        FontAttributes="Bold"
+                                        TextColor="White"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="WordWrap"
+                                        MaxLines="3"
+                                        Padding="14,0" />
+                                    <!-- Specular highlight — plastic dome gloss -->
+                                    <Border
+                                        WidthRequest="80"
+                                        HeightRequest="32"
+                                        StrokeShape="Ellipse"
+                                        StrokeThickness="0"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Start"
+                                        Margin="0,20,0,0"
+                                        InputTransparent="True">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#55FFFFFF" Offset="0" />
+                                                <GradientStop Color="#00FFFFFF" Offset="1" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Grid>
                             </Border>
                         </Grid>
                     </DataTemplate>

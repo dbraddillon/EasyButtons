@@ -37,9 +37,10 @@ public partial class MainViewModel(EasyButtonRepository repo) : BaseViewModel
     }
 
     [RelayCommand]
-    private static async Task EditAsync(EasyButton button)
+    private static Task EditAsync(EasyButton button)
     {
-        await Shell.Current.GoToAsync($"EditButtonPage?buttonId={button.Id}");
+        return MainThread.InvokeOnMainThreadAsync(() =>
+            Shell.Current.GoToAsync($"EditButtonPage?buttonId={button.Id}"));
     }
 
     [RelayCommand]

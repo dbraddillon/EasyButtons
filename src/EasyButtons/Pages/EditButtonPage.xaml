@@ -27,7 +27,7 @@
                 WidthRequest="150"
                 StrokeShape="Ellipse"
                 StrokeThickness="0"
-                BackgroundColor="{Binding Color}"
+                BackgroundColor="{Binding Color, Converter={StaticResource HexToColorConverter}}"
                 HorizontalOptions="Center">
                 <Border.Shadow>
                     <Shadow Brush="Black" Offset="0,6" Radius="16" Opacity="0.5" />
@@ -91,7 +91,7 @@
                                     StrokeShape="Ellipse"
                                     StrokeThickness="3"
                                     Stroke="Transparent"
-                                    BackgroundColor="{Binding .}">
+                                    BackgroundColor="{Binding ., Converter={StaticResource HexToColorConverter}}">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectColorCommand}"
