@@ -1,6 +1,7 @@
 using EasyButtons.Data;
 using EasyButtons.Pages;
 using EasyButtons.Repositories;
+using EasyButtons.Services;
 using EasyButtons.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +23,7 @@ public static class MauiProgram
         var s = builder.Services;
         s.AddSingleton<DatabaseContext>();
         s.AddSingleton<EasyButtonRepository>();
+        s.AddSingleton<ProService>();
         s.AddSingleton<MainViewModel>();
         s.AddSingleton<MainPage>();
         s.AddTransient<EditButtonViewModel>();

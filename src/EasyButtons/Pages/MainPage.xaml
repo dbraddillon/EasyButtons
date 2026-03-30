@@ -49,7 +49,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:EasyButton">
                         <!-- Big round Easy Button -->
-                        <Grid Padding="4">
+                        <Grid Padding="6">
                             <Grid.Behaviors>
                                 <helpers:ButtonGestureBehavior
                                     TapCommand="{Binding Source={x:Reference ThisPage}, Path=BindingContext.LaunchCommand}"
@@ -58,53 +58,91 @@
                                     LongPressCommandParameter="{Binding .}" />
                             </Grid.Behaviors>
 
-                            <!-- Drop shadow — larger + deeper offset gives the dome its lift -->
+                            <!-- Ground shadow — elliptical, offset down, simulates surface -->
                             <BoxView
-                                CornerRadius="80"
-                                HeightRequest="150"
-                                WidthRequest="150"
+                                CornerRadius="72"
+                                HeightRequest="144"
+                                WidthRequest="148"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center"
-                                Margin="0,14,0,0"
+                                Margin="0,18,0,0"
                                 Color="#000000"
                                 Opacity="0.55" />
 
-                            <!-- Button dome -->
+                            <!-- Metallic rim — dark radial gradient ring around dome -->
                             <Border
-                                HeightRequest="140"
-                                WidthRequest="140"
+                                HeightRequest="152"
+                                WidthRequest="152"
+                                StrokeShape="Ellipse"
+                                StrokeThickness="0"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                Margin="0,4,0,0">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.38,0.32" Radius="0.75">
+                                        <GradientStop Color="#484848" Offset="0" />
+                                        <GradientStop Color="#282828" Offset="0.5" />
+                                        <GradientStop Color="#181818" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- Button dome — colored, slightly above rim center -->
+                            <Border
+                                HeightRequest="138"
+                                WidthRequest="138"
                                 StrokeShape="Ellipse"
                                 StrokeThickness="0"
                                 BackgroundColor="{Binding Color, Converter={StaticResource HexToColorConverter}}"
                                 HorizontalOptions="Center"
-                                VerticalOptions="Center">
+                                VerticalOptions="Center"
+                                Margin="0,0,0,6">
                                 <Border.Shadow>
-                                    <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.5" />
+                                    <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.4" />
                                 </Border.Shadow>
                                 <Grid>
+                                    <!-- Label — pushed below the glare area -->
                                     <Label
                                         Text="{Binding Label}"
-                                        FontSize="17"
+                                        FontSize="16"
                                         FontAttributes="Bold"
                                         TextColor="White"
                                         HorizontalTextAlignment="Center"
                                         VerticalTextAlignment="Center"
                                         LineBreakMode="WordWrap"
                                         MaxLines="3"
-                                        Padding="14,0" />
-                                    <!-- Specular highlight — plastic dome gloss -->
+                                        Padding="12,32,12,4" />
+                                    <!-- Wide gloss sweep — upper dome -->
                                     <Border
-                                        WidthRequest="80"
-                                        HeightRequest="32"
+                                        WidthRequest="94"
+                                        HeightRequest="48"
                                         StrokeShape="Ellipse"
                                         StrokeThickness="0"
                                         HorizontalOptions="Center"
                                         VerticalOptions="Start"
-                                        Margin="0,20,0,0"
+                                        Margin="0,12,0,0"
                                         InputTransparent="True">
                                         <Border.Background>
                                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Color="#55FFFFFF" Offset="0" />
+                                                <GradientStop Color="#66FFFFFF" Offset="0" />
+                                                <GradientStop Color="#22FFFFFF" Offset="0.55" />
+                                                <GradientStop Color="#00FFFFFF" Offset="1" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <!-- Sharp specular point — top-left -->
+                                    <Border
+                                        WidthRequest="42"
+                                        HeightRequest="20"
+                                        StrokeShape="Ellipse"
+                                        StrokeThickness="0"
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Start"
+                                        Margin="24,12,0,0"
+                                        InputTransparent="True">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#CCFFFFFF" Offset="0" />
                                                 <GradientStop Color="#00FFFFFF" Offset="1" />
                                             </LinearGradientBrush>
                                         </Border.Background>
@@ -136,6 +174,26 @@
                 <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.5" />
             </Button.Shadow>
         </Button>
+
+        <!-- Pro upsell hint — shown when free limit reached -->
+        <Border
+            Grid.Row="0"
+            IsVisible="{Binding IsAtFreeLimit}"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,16,100"
+            StrokeShape="RoundRectangle 12"
+            StrokeThickness="0"
+            Padding="10,6">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#CC000000" Offset="0" />
+                    <GradientStop Color="#CC1a1a1a" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Label Text="🔒 4-button limit · Tap + for Pro"
+                   TextColor="#CCCCCC" FontSize="12" />
+        </Border>
 
         <!-- Debug banner -->
         <Label x:Name="DebugBanner" Grid.Row="1"

@@ -24,12 +24,14 @@ public class ButtonGestureBehavior : Behavior<Microsoft.Maui.Controls.View>
     public ICommand? LongPressCommand     { get => (ICommand?)GetValue(LongPressCommandProperty);     set => SetValue(LongPressCommandProperty, value); }
     public object?   LongPressCommandParameter { get => GetValue(LongPressCommandParameterProperty); set => SetValue(LongPressCommandParameterProperty, value); }
 
-    private Android.Views.View? _native;
-    private GestureDetector?    _detector;
+    private Android.Views.View?               _native;
+    private GestureDetector?                  _detector;
+    private Microsoft.Maui.Controls.View?     _mauiView;
 
     protected override void OnAttachedTo(Microsoft.Maui.Controls.View bindable)
     {
         base.OnAttachedTo(bindable);
+        _mauiView  = bindable;
         BindingContext = bindable.BindingContext;
         bindable.BindingContextChanged += OnBindingContextChanged;
         bindable.HandlerChanged        += OnHandlerChanged;
@@ -42,6 +44,7 @@ public class ButtonGestureBehavior : Behavior<Microsoft.Maui.Controls.View>
         base.OnDetachingFrom(bindable);
         bindable.BindingContextChanged -= OnBindingContextChanged;
         bindable.HandlerChanged        -= OnHandlerChanged;
+        _mauiView = null;
         Detach();
     }
 
@@ -73,16 +76,33 @@ public class ButtonGestureBehavior : Behavior<Microsoft.Maui.Controls.View>
 
     internal void FireTap()
     {
-        var (cmd, p) = (TapCommand, TapCommandParameter);
-        if (cmd?.CanExecute(p) == true)
-            MainThread.BeginInvokeOnMainThread(() => cmd.Execute(p));
+        var view       = _mauiView;
+        var (cmd, p)   = (TapCommand, TapCommandParameter);
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            // Press-in animation, then spring back while command runs
+            if (view != null)
+            {
+                await view.ScaleToAsync(0.86, 70, Easing.CubicIn);
+                _ = view.ScaleToAsync(1.0, 200, Easing.SpringOut);
+            }
+            if (cmd?.CanExecute(p) == true) cmd.Execute(p);
+        });
     }
 
     internal void FireLongPress()
     {
-        var (cmd, p) = (LongPressCommand, LongPressCommandParameter);
-        if (cmd?.CanExecute(p) == true)
-            MainThread.BeginInvokeOnMainThread(() => cmd.Execute(p));
+        var view       = _mauiView;
+        var (cmd, p)   = (LongPressCommand, LongPressCommandParameter);
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            if (view != null)
+            {
+                await view.ScaleToAsync(0.92, 80, Easing.CubicIn);
+                _ = view.ScaleToAsync(1.0, 160, Easing.SpringOut);
+            }
+            if (cmd?.CanExecute(p) == true) cmd.Execute(p);
+        });
     }
 
     // ── inner classes ────────────────────────────────────────────────────────

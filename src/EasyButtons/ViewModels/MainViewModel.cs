@@ -3,17 +3,20 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EasyButtons.Models;
 using EasyButtons.Repositories;
+using EasyButtons.Services;
 using EasyButtons.Helpers;
 
 namespace EasyButtons.ViewModels;
 
-public partial class MainViewModel(EasyButtonRepository repo) : BaseViewModel
+public partial class MainViewModel(EasyButtonRepository repo, ProService pro) : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    [NotifyPropertyChangedFor(nameof(IsAtFreeLimit))]
     private ObservableCollection<EasyButton> _buttons = [];
 
-    public bool IsEmpty => Buttons.Count == 0;
+    public bool IsEmpty       => Buttons.Count == 0;
+    public bool IsAtFreeLimit => !pro.IsPro && Buttons.Count >= ProService.FreeButtonLimit;
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -44,8 +47,25 @@ public partial class MainViewModel(EasyButtonRepository repo) : BaseViewModel
     }
 
     [RelayCommand]
-    private static async Task AddAsync()
+    private async Task AddAsync()
     {
+        if (IsAtFreeLimit)
+        {
+            var upgrade = await Shell.Current.DisplayAlertAsync(
+                "Unlock Unlimited Buttons",
+                $"The free version supports up to {ProService.FreeButtonLimit} buttons.\n\nUpgrade to EasyButtons Pro for $1.99 to add unlimited buttons and custom sounds.",
+                "Get Pro", "Not Now");
+            if (upgrade)
+                await PurchaseProAsync();
+            return;
+        }
         await Shell.Current.GoToAsync("EditButtonPage");
+    }
+
+    private async Task PurchaseProAsync()
+    {
+        var ok = await pro.PurchaseAsync();
+        if (!ok)
+            await Shell.Current.DisplayAlertAsync("Coming Soon", "Pro purchase will be available in the next update.", "OK");
     }
 }
