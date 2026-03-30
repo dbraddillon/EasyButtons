@@ -1,7 +1,9 @@
 #if ANDROID
 using Android.Content;
 using AndroidX.Core.Content.PM;
+using AndroidX.Core.Graphics.Drawable;
 using Android.Content.PM;
+using Android.Graphics;
 using Android.Graphics.Drawables;
 #endif
 
@@ -53,13 +55,26 @@ public static class LaunchHelper
         // If this app can't handle it, let the system pick — remove package restriction
         var launchIntent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(uri));
 
+        var icon = MakeCircleIcon(hexColor);
         var info = new ShortcutInfoCompat.Builder(context, id)
             .SetShortLabel(label)
             .SetLongLabel(label)
+            .SetIcon(icon)
             .SetIntent(launchIntent)
             .Build();
 
         return ShortcutManagerCompat.RequestPinShortcut(context, info, null);
+    }
+
+    private static IconCompat MakeCircleIcon(string hexColor)
+    {
+        const int size = 192;
+        var bmp    = Bitmap.CreateBitmap(size, size, Bitmap.Config.Argb8888!)!;
+        var canvas = new Canvas(bmp);
+        var paint  = new Android.Graphics.Paint { AntiAlias = true };
+        paint.Color = Android.Graphics.Color.ParseColor(hexColor);
+        canvas.DrawCircle(size / 2f, size / 2f, size / 2f, paint);
+        return IconCompat.CreateWithBitmap(bmp)!;
     }
 #endif
 }

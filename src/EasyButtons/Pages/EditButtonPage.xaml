@@ -115,6 +115,18 @@
                 Command="{Binding DeleteCommand}"
                 Margin="0,16,0,0" />
 
+            <!-- Pin to home screen (edit mode + device supports it) -->
+            <Button
+                IsVisible="{Binding CanPin}"
+                Text="📌 Pin to Home Screen"
+                BackgroundColor="Transparent"
+                BorderColor="#555"
+                BorderWidth="1"
+                TextColor="#AAA"
+                CornerRadius="12"
+                Command="{Binding PinShortcutCommand}"
+                Margin="0,8,0,0" />
+
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

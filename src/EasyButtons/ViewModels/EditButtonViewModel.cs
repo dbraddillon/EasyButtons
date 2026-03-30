@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EasyButtons.Helpers;
 using EasyButtons.Models;
 using EasyButtons.Repositories;
 
@@ -83,4 +84,15 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
 
     [RelayCommand]
     private void SelectColor(string color) => Color = color;
+
+#if ANDROID
+    public bool CanPin => LaunchHelper.CanPinShortcuts();
+
+    [RelayCommand]
+    private void PinShortcut()
+    {
+        if (_existing is null) return;
+        LaunchHelper.PinShortcut(_existing.Id.ToString(), Label, Uri, Color);
+    }
+#endif
 }
