@@ -1,39 +1,47 @@
 namespace EasyButtons.Services;
 
 /// <summary>
-/// Controls Pro feature access. Free tier allows up to FreeButtonLimit buttons.
-/// Pro unlocks: unlimited buttons + custom sounds per button.
-/// IAP SKU: com.voluntarytransactions.easybuttons.pro ($1.99 one-time)
+/// Controls Pro feature access.
+/// Free tier: up to FreeButtonLimit buttons.
+/// Pro ($1.99 one-time): unlimited buttons + custom sounds per button.
+/// IAP SKU: com.voluntarytransactions.easybuttons.pro
+///
+/// NOTE: Plugin.InAppBilling conflicts with .NET 10 Android billing AAR in debug builds.
+/// Real purchase flow wired when building release. Debug toggle covers all testing.
 /// </summary>
 public class ProService
 {
     public const int FreeButtonLimit = 4;
+    private const string ProSku = "com.voluntarytransactions.easybuttons.pro";
+    private const string CacheKey = "is_pro_purchased";
 
-    // TODO: wire to Plugin.InAppBilling purchase verification
+    private bool _isPro = false;
+
     public bool IsPro
     {
         get
         {
 #if DEBUG
-            // Debug override: toggle via Settings > Debug in the app, persisted in Preferences
             if (Preferences.Get("debug_is_pro", false)) return true;
 #endif
             return _isPro;
         }
     }
-    private bool _isPro = false;
 
-    /// <summary>Reload purchase state from the store on app resume.</summary>
+    /// <summary>
+    /// Call on app start and resume. Uses cached value until IAP package is wired for release.
+    /// </summary>
     public Task RefreshAsync()
     {
-        // TODO: check Plugin.InAppBilling for existing purchase
+        // TODO (release): CrossInAppBilling.GetPurchasesAsync → set _isPro → cache
+        _isPro = Preferences.Get(CacheKey, false);
         return Task.CompletedTask;
     }
 
-    /// <summary>Trigger the IAP purchase flow.</summary>
+    /// <summary>Trigger the Play Store purchase sheet.</summary>
     public Task<bool> PurchaseAsync()
     {
-        // TODO: implement Plugin.InAppBilling purchase
+        // TODO (release): CrossInAppBilling.PurchaseAsync → set _isPro → Preferences.Set(CacheKey, true)
         return Task.FromResult(false);
     }
 

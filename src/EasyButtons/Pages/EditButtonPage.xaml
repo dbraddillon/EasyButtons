@@ -103,6 +103,37 @@
                 </CollectionView>
             </VerticalStackLayout>
 
+            <!-- Sound picker (Pro feature) -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="SOUND" FontSize="11" FontAttributes="Bold"
+                       TextColor="#888" CharacterSpacing="0.5" />
+                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                        BackgroundColor="#222222" Padding="14,10">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0"
+                               Text="{Binding SoundName}"
+                               TextColor="#CCCCCC"
+                               VerticalTextAlignment="Center"
+                               FontSize="15" />
+                        <Button Grid.Column="1"
+                                Text="Choose"
+                                Command="{Binding PickSoundCommand}"
+                                BackgroundColor="#333" TextColor="White"
+                                FontSize="13" Padding="12,6"
+                                CornerRadius="8" HeightRequest="36" />
+                        <Button Grid.Column="2"
+                                Text="✕"
+                                IsVisible="{Binding HasSound}"
+                                Command="{Binding RemoveSoundCommand}"
+                                BackgroundColor="Transparent" TextColor="#888"
+                                FontSize="16" Padding="8,0"
+                                CornerRadius="8" HeightRequest="36" />
+                    </Grid>
+                </Border>
+                <Label Text="🔒 Pro — custom sounds require EasyButtons Pro"
+                       FontSize="12" TextColor="#555" />
+            </VerticalStackLayout>
+
             <!-- Delete button (edit mode only) -->
             <Button
                 IsVisible="{Binding IsEdit}"

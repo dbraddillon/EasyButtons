@@ -24,6 +24,7 @@ public static class MauiProgram
         s.AddSingleton<DatabaseContext>();
         s.AddSingleton<EasyButtonRepository>();
         s.AddSingleton<ProService>();
+        s.AddSingleton<SoundService>();
         s.AddSingleton<BackupService>();
         s.AddSingleton<MainViewModel>();
         s.AddSingleton<MainPage>();

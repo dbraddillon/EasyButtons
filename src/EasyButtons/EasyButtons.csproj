@@ -20,6 +20,8 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- Plugin.InAppBilling: add when building release — conflicts with .NET 10 Android billing AAR in debug builds -->
+		<!-- <PackageReference Include="Plugin.InAppBilling" Version="7.1.2" /> -->
 <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.41" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />

@@ -8,7 +8,7 @@ using EasyButtons.Helpers;
 
 namespace EasyButtons.ViewModels;
 
-public partial class MainViewModel(EasyButtonRepository repo, ProService pro, BackupService backup) : BaseViewModel
+public partial class MainViewModel(EasyButtonRepository repo, ProService pro, BackupService backup, SoundService sound) : BaseViewModel
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
@@ -37,6 +37,10 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
     [RelayCommand]
     private async Task LaunchAsync(EasyButton button)
     {
+        // Play sound fire-and-forget — never delay the launch
+        if (!string.IsNullOrEmpty(button.SoundPath))
+            sound.Play(button.SoundPath);
+
         var ok = await LaunchHelper.TryLaunchAsync(button.Uri);
         if (!ok)
             await Shell.Current.DisplayAlertAsync("Can't open", $"No app found to handle:\n{button.Uri}", "OK");

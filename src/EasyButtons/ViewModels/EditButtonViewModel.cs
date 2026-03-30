@@ -3,11 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using EasyButtons.Helpers;
 using EasyButtons.Models;
 using EasyButtons.Repositories;
+using EasyButtons.Services;
 
 namespace EasyButtons.ViewModels;
 
 [QueryProperty(nameof(ButtonId), "buttonId")]
-public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewModel
+public partial class EditButtonViewModel(EasyButtonRepository repo, ProService pro) : BaseViewModel
 {
     private EasyButton? _existing;
 
@@ -16,6 +17,17 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
     [ObservableProperty] private string _uri = string.Empty;
     [ObservableProperty] private string _color = "#E53935";
     [ObservableProperty] private bool _isEdit;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SoundName))]
+    [NotifyPropertyChangedFor(nameof(HasSound))]
+    private string? _soundPath;
+
+    public string SoundName => string.IsNullOrEmpty(SoundPath)
+        ? "None"
+        : Path.GetFileNameWithoutExtension(SoundPath);
+
+    public bool HasSound => !string.IsNullOrEmpty(SoundPath);
 
     // Preset colors for the picker
     public List<string> PresetColors { get; } =
@@ -45,6 +57,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         Label = _existing.Label;
         Uri = _existing.Uri;
         Color = _existing.Color;
+        SoundPath = _existing.SoundPath;
         IsEdit = true;
     }
 
@@ -66,6 +79,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         button.Label = Label.Trim();
         button.Uri = Uri.Trim();
         button.Color = Color;
+        button.SoundPath = SoundPath;
 
         await repo.SaveAsync(button);
         await Shell.Current.GoToAsync("..");
@@ -84,6 +98,55 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
 
     [RelayCommand]
     private void SelectColor(string color) => Color = color;
+
+    [RelayCommand]
+    private async Task PickSoundAsync()
+    {
+        if (!pro.IsPro)
+        {
+            var upgrade = await Shell.Current.DisplayAlertAsync(
+                "Pro Feature",
+                "Custom sounds are available with EasyButtons Pro ($1.99 one-time).",
+                "Get Pro", "Not Now");
+            if (upgrade) await TryPurchaseAsync();
+            return;
+        }
+
+        var result = await FilePicker.PickAsync(new PickOptions
+        {
+            PickerTitle = "Choose a sound",
+            FileTypes = new FilePickerFileType(
+                new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.Android, ["audio/*"] },
+                }),
+        });
+
+        if (result is null) return;
+
+        // Copy into app-private sounds folder so it survives file manager moves
+        var dir = Path.Combine(FileSystem.AppDataDirectory, "sounds");
+        Directory.CreateDirectory(dir);
+        var dest = Path.Combine(dir, $"{(_existing?.Id ?? Guid.NewGuid())}{Path.GetExtension(result.FileName)}");
+        File.Copy(result.FullPath, dest, overwrite: true);
+        SoundPath = dest;
+    }
+
+    [RelayCommand]
+    private void RemoveSound()
+    {
+        if (SoundPath != null && File.Exists(SoundPath))
+            try { File.Delete(SoundPath); } catch { }
+        SoundPath = null;
+    }
+
+    private async Task TryPurchaseAsync()
+    {
+        var ok = await pro.PurchaseAsync();
+        if (!ok)
+            await Shell.Current.DisplayAlertAsync("Coming Soon",
+                "Pro purchase will be available in the next update.", "OK");
+    }
 
 #if ANDROID
     public bool CanPin => LaunchHelper.CanPinShortcuts();
