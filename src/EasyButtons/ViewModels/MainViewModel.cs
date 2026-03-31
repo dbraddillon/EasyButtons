@@ -61,22 +61,13 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
     {
         if (IsAtFreeLimit)
         {
-            var upgrade = await Shell.Current.DisplayAlertAsync(
-                "Unlock Unlimited Buttons",
-                $"The free version supports up to {ProService.FreeButtonLimit} buttons.\n\nUpgrade to EasyButtons Pro for $1.99 to add unlimited buttons.",
-                "Get Pro", "Not Now");
-            if (upgrade)
-                await PurchaseProAsync();
+            await Shell.Current.DisplayAlertAsync(
+                "Button Limit Reached",
+                $"EasyButtons supports up to {ProService.FreeButtonLimit} buttons. Unlimited buttons and more are coming in a future Pro update.",
+                "OK");
             return;
         }
         await Shell.Current.GoToAsync("EditButtonPage");
-    }
-
-    private async Task PurchaseProAsync()
-    {
-        var ok = await pro.PurchaseAsync();
-        if (!ok)
-            await Shell.Current.DisplayAlertAsync("Coming Soon", "Pro purchase will be available in the next update.", "OK");
     }
 
     [RelayCommand]

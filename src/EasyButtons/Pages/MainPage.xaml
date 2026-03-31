@@ -121,37 +121,20 @@
                                         LineBreakMode="WordWrap"
                                         MaxLines="3"
                                         Padding="12,32,12,4" />
-                                    <!-- Wide gloss sweep — upper dome -->
+                                    <!-- Gloss sweep — upper-left dome highlight -->
                                     <Border
-                                        WidthRequest="94"
-                                        HeightRequest="48"
+                                        WidthRequest="86"
+                                        HeightRequest="44"
                                         StrokeShape="Ellipse"
                                         StrokeThickness="0"
                                         HorizontalOptions="Center"
                                         VerticalOptions="Start"
-                                        Margin="0,12,0,0"
+                                        Margin="-16,12,0,0"
                                         InputTransparent="True">
                                         <Border.Background>
                                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Color="#66FFFFFF" Offset="0" />
-                                                <GradientStop Color="#22FFFFFF" Offset="0.55" />
-                                                <GradientStop Color="#00FFFFFF" Offset="1" />
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                    </Border>
-                                    <!-- Sharp specular point — top-left -->
-                                    <Border
-                                        WidthRequest="42"
-                                        HeightRequest="20"
-                                        StrokeShape="Ellipse"
-                                        StrokeThickness="0"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="Start"
-                                        Margin="24,12,0,0"
-                                        InputTransparent="True">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#CCFFFFFF" Offset="0" />
+                                                <GradientStop Color="#55FFFFFF" Offset="0" />
+                                                <GradientStop Color="#18FFFFFF" Offset="0.6" />
                                                 <GradientStop Color="#00FFFFFF" Offset="1" />
                                             </LinearGradientBrush>
                                         </Border.Background>
@@ -183,26 +166,6 @@
                 <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.5" />
             </Button.Shadow>
         </Button>
-
-        <!-- Pro upsell hint — shown when free limit reached -->
-        <Border
-            Grid.Row="0"
-            IsVisible="{Binding IsAtFreeLimit}"
-            HorizontalOptions="End"
-            VerticalOptions="End"
-            Margin="0,0,16,100"
-            StrokeShape="RoundRectangle 12"
-            StrokeThickness="0"
-            Padding="10,6">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#CC000000" Offset="0" />
-                    <GradientStop Color="#CC1a1a1a" Offset="1" />
-                </LinearGradientBrush>
-            </Border.Background>
-            <Label Text="🔒 4-button limit · Tap + for Pro"
-                   TextColor="#CCCCCC" FontSize="12" />
-        </Border>
 
         <!-- Debug bar: banner + Pro toggle (compile-time zero footprint in Release) -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto">

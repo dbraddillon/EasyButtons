@@ -31,7 +31,7 @@ Play Console → All apps → Create app
 - App name: `EasyButtons: One-Tap Launcher`
 - Default language: English (United States)
 - App or game: App
-- Free or paid: Free (IAP inside)
+- Free or paid: Free
 - Accept declarations → Create app
 
 ---
@@ -69,20 +69,13 @@ Each button is a shortcut to anything your phone can open:
 • SMS — open a message thread
 • Navigation — jump straight to a Maps destination
 • Custom URI schemes — trigger any deep link or app action
+• Sound buttons — tap to play any audio file (sound effects, voice clips, whatever)
 
-Arrange as many buttons as you want, pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+Up to 4 buttons. Pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
 
 ── WHY EASY BUTTONS ──
 
 Inspired by the classic "That was easy" button — the idea that some things should just be one press. Quick habits, frequent destinations, shortcuts you use every day. Stop digging through app drawers and just press the button.
-
-── PRO ──
-
-EasyButtons Pro unlocks:
-• Unlimited buttons (free tier: 4 buttons)
-• Custom sounds — assign any audio file to any button
-
-One-time purchase. No subscription, ever.
 
 ── BACKUP & RESTORE ──
 
@@ -153,7 +146,7 @@ Play Console → Data safety
 | Health and fitness | Not collected |
 | Messages | Not collected |
 | Photos and videos | Not collected |
-| Audio files | Not collected (even when custom sounds used — file stays on device) |
+| Audio files | Not collected (sound files stay on device, never transmitted) |
 | Files and docs | Not collected |
 | Calendar | Not collected |
 | Contacts | Not collected |
@@ -173,7 +166,7 @@ Play Console → Data safety
 
 **Ads:** No, this app does not contain ads
 
-**Target audience:** 13 and older (due to IAP)
+**Target audience:** 13 and older
 
 **News app:** No
 
@@ -202,7 +195,7 @@ If not already uploaded:
 - Upload `bin/Release/net10.0-android/com.voluntarytransactions.easybuttons-Signed.aab`
 - Release notes:
 ```
-Initial release — create big colorful buttons that launch any app, website, or URI in one tap. Long-press to edit. Export/import backup included.
+Initial release — create big colorful dome buttons that launch any app, website, URI, or sound in one tap. Long-press to edit. Export/import backup included.
 ```
 - Save → Review release → Start rollout to Internal testing
 
@@ -216,7 +209,7 @@ Go through each section in Play Console and confirm green/complete:
 - [ ] Ads — declared
 - [ ] Target audience — set
 - [ ] Internal testing release — AAB uploaded, rollout started
-- [ ] Pricing — Free (set under Monetize if needed)
+- [ ] Pricing — Free
 
 Fix any incomplete sections, then confirm all green.
 
