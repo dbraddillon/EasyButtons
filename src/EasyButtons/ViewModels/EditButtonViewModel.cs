@@ -93,6 +93,9 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         button.SoundPath = IsSoundMode ? SoundPath : null;
 
         await repo.SaveAsync(button);
+#if ANDROID
+        WidgetHelper.RequestUpdate();
+#endif
         await Shell.Current.GoToAsync("..");
     }
 
@@ -105,6 +108,9 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         if (!confirmed) return;
         DeleteSoundFile();
         await repo.DeleteAsync(_existing.Id);
+#if ANDROID
+        WidgetHelper.RequestUpdate();
+#endif
         await Shell.Current.GoToAsync("..");
     }
 

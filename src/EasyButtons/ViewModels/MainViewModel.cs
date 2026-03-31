@@ -93,6 +93,9 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
         else
         {
             await LoadAsync();
+#if ANDROID
+            WidgetHelper.RequestUpdate();
+#endif
             await Shell.Current.DisplayAlertAsync("Done", $"{count} button{(count == 1 ? "" : "s")} restored.", "OK");
         }
     }
