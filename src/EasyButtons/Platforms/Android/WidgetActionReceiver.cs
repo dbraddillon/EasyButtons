@@ -1,3 +1,4 @@
+using Android.Appwidget;
 using Android.Content;
 using Android.Media;
 using EasyButtons.Models;
@@ -21,10 +22,11 @@ public class WidgetActionReceiver : BroadcastReceiver
     {
         if (context is null || intent is null) return;
 
+        var widgetId  = intent.GetIntExtra("widget_id", AppWidgetManager.InvalidAppwidgetId);
         var slotIndex = intent.GetIntExtra("slot_index", -1);
         if (slotIndex < 0) return;
 
-        var button = LoadButton(context, slotIndex);
+        var button = LoadButton(context, widgetId, slotIndex);
         if (button is null) return;
 
         // SoundPath must be a real existing file — ignore stale sentinel values (e.g. "click")
@@ -36,14 +38,29 @@ public class WidgetActionReceiver : BroadcastReceiver
             LaunchUri(context, button.Uri);
     }
 
-    private static EasyButton? LoadButton(Context context, int slotIndex)
+    private static EasyButton? LoadButton(Context context, int widgetId, int slotIndex)
     {
+        var prefs = context.GetSharedPreferences(WidgetConfigureActivity.PrefsName, FileCreationMode.Private);
+        var config = prefs?.GetString($"config_{widgetId}", null);
+
         var dbPath = IOPath.Combine(context.FilesDir!.AbsolutePath, "easybuttons.db3");
         if (!File.Exists(dbPath)) return null;
+
         try
         {
             using var db = new SQLiteConnection(dbPath);
-            return db.Table<EasyButton>().OrderBy(b => b.SortOrder).Skip(slotIndex).FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                var parts = config.Split(',');
+                if (slotIndex < parts.Length && Guid.TryParse(parts[slotIndex], out var id))
+                    return db.Find<EasyButton>(id);
+                return null;
+            }
+            else
+            {
+                return db.Table<EasyButton>().OrderBy(b => b.SortOrder).Skip(slotIndex).FirstOrDefault();
+            }
         }
         catch { return null; }
     }

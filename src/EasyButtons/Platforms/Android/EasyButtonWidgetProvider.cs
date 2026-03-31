@@ -30,11 +30,28 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
             UpdateWidget(context, appWidgetManager, id, Resource.Layout.easy_button_widget);
     }
 
-    /// <summary>Called from the app whenever buttons change so all 2×2 widgets stay current.</summary>
     public static void UpdateAll(Context context)
         => UpdateAllFor(context, typeof(EasyButtonWidgetProvider), Resource.Layout.easy_button_widget);
 
-    // ── Shared helpers used by all layout variants ──────────────────────────
+    /// <summary>Updates a single widget by ID, auto-detecting which layout it uses.</summary>
+    public static void UpdateWidgetById(Context context, int widgetId)
+    {
+        var manager = AppWidgetManager.GetInstance(context);
+        if (manager is null) return;
+
+        var info = manager.GetAppWidgetInfo(widgetId);
+        var className = info?.Provider?.ClassName ?? "";
+        var layoutResource = className switch
+        {
+            var n when n.Contains("ProviderV") => Resource.Layout.easy_button_widget_vertical,
+            var n when n.Contains("ProviderH") => Resource.Layout.easy_button_widget_horizontal,
+            _ => Resource.Layout.easy_button_widget
+        };
+
+        UpdateWidget(context, manager, widgetId, layoutResource);
+    }
+
+    // ── Shared helpers used by all layout variants ──────────────────────────────
 
     protected static void UpdateAllFor(Context context, Type providerType, int layoutResource)
     {
@@ -49,32 +66,32 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
 
     protected static void UpdateWidget(Context context, AppWidgetManager manager, int widgetId, int layoutResource)
     {
-        var buttons = LoadButtons(context);
+        var buttons = LoadButtonsForWidget(context, widgetId);
         var views = new RemoteViews(context.PackageName!, layoutResource);
 
         for (int i = 0; i < 4; i++)
         {
             var viewId = SlotViewIds[i];
+            var btn = buttons[i];
 
-            // Each slot gets a unique data URI → filterEquals is distinct per slot,
-            // guaranteeing Android treats these as 4 separate PendingIntents.
+            // URI includes widgetId so each widget instance gets its own PendingIntents
             var tapIntent = new Intent(context, typeof(WidgetActionReceiver));
             tapIntent.SetAction(WidgetActionReceiver.Action);
-            tapIntent.SetData(Android.Net.Uri.Parse($"easybtn://slot/{i}"));
+            tapIntent.SetData(Android.Net.Uri.Parse($"easybtn://widget/{widgetId}/slot/{i}"));
             tapIntent.PutExtra("slot_index", i);
-            var pi = PendingIntent.GetBroadcast(context, i, tapIntent,
+            tapIntent.PutExtra("widget_id", widgetId);
+            var pi = PendingIntent.GetBroadcast(context, 0, tapIntent,
                 PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
 
-            if (i < buttons.Count)
+            if (btn is not null)
             {
-                var btn = buttons[i];
                 views.SetImageViewBitmap(viewId, CreateButtonBitmap(btn.Label, btn.Color, 200));
                 views.SetOnClickPendingIntent(viewId, pi);
             }
             else
             {
                 views.SetImageViewBitmap(viewId, CreateEmptyBitmap(200));
-                views.SetOnClickPendingIntent(viewId, pi); // no-op tap (no button at this slot)
+                views.SetOnClickPendingIntent(viewId, pi);
             }
         }
 
@@ -83,21 +100,44 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
 
     // ── Data ────────────────────────────────────────────────────────────────────
 
-    private static List<EasyButton> LoadButtons(Context context)
+    /// <summary>Returns 4 slots for the widget; null = empty slot. Uses per-widget config if set.</summary>
+    private static List<EasyButton?> LoadButtonsForWidget(Context context, int widgetId)
     {
+        var result = new List<EasyButton?> { null, null, null, null };
+
+        var prefs = context.GetSharedPreferences(WidgetConfigureActivity.PrefsName, FileCreationMode.Private);
+        var config = prefs?.GetString($"config_{widgetId}", null);
+
         var dbPath = IOPath.Combine(context.FilesDir!.AbsolutePath, "easybuttons.db3");
-        if (!File.Exists(dbPath)) return [];
+        if (!File.Exists(dbPath)) return result;
+
         try
         {
             using var db = new SQLiteConnection(dbPath);
-            return [.. db.Table<EasyButton>().OrderBy(b => b.SortOrder).Take(4)];
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                var parts = config.Split(',');
+                for (int i = 0; i < Math.Min(4, parts.Length); i++)
+                    if (Guid.TryParse(parts[i], out var id))
+                        result[i] = db.Find<EasyButton>(id);
+            }
+            else
+            {
+                // No config yet — fall back to first 4 by sort order
+                var buttons = db.Table<EasyButton>().OrderBy(b => b.SortOrder).Take(4).ToList();
+                for (int i = 0; i < buttons.Count; i++)
+                    result[i] = buttons[i];
+            }
         }
-        catch { return []; }
+        catch { }
+
+        return result;
     }
 
     // ── Bitmap rendering ────────────────────────────────────────────────────────
 
-    protected static Bitmap CreateButtonBitmap(string label, string hexColor, int size)
+    internal static Bitmap CreateButtonBitmap(string label, string hexColor, int size)
     {
         var bitmap = Bitmap.CreateBitmap(size, size, Bitmap.Config.Argb8888!)!;
         using var canvas = new Canvas(bitmap);
@@ -106,17 +146,14 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
         float cy = size / 2f;
         float r  = size / 2f - 4;
 
-        // Parse hex color
         Android.Graphics.Color baseColor;
         try   { baseColor = Android.Graphics.Color.ParseColor(hexColor); }
         catch { baseColor = Android.Graphics.Color.ParseColor("#E53935"); }
 
-        // Dome circle
         using var domePaint = new AGPaint { AntiAlias = true };
         domePaint.Color = baseColor;
         canvas.DrawCircle(cx, cy, r, domePaint);
 
-        // Gloss highlight — upper-left radial fade
         using var glossPaint = new AGPaint { AntiAlias = true };
         using var shader = new Android.Graphics.RadialGradient(
             cx - r * 0.2f, cy - r * 0.32f, r * 0.7f,
@@ -126,14 +163,12 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
         glossPaint.SetShader(shader);
         canvas.DrawCircle(cx, cy, r, glossPaint);
 
-        // Label — truncate long names
         var text = label.Length > 10 ? label[..9].TrimEnd() + "…" : label;
         using var textPaint = new AGPaint { AntiAlias = true };
         textPaint.Color = Android.Graphics.Color.White;
         textPaint.TextAlign = AGPaint.Align.Center;
         textPaint.TextSize = size * 0.155f;
         textPaint.SetTypeface(Typeface.DefaultBold);
-        // Vertical center: DrawText baseline is at y, so offset up slightly
         var metrics = textPaint.GetFontMetrics()!;
         float textY = cy - (metrics.Ascent + metrics.Descent) / 2f;
         canvas.DrawText(text, cx, textY, textPaint);
@@ -141,7 +176,7 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
         return bitmap;
     }
 
-    protected static Bitmap CreateEmptyBitmap(int size)
+    internal static Bitmap CreateEmptyBitmap(int size)
     {
         var bitmap = Bitmap.CreateBitmap(size, size, Bitmap.Config.Argb8888!)!;
         using var canvas = new Canvas(bitmap);
