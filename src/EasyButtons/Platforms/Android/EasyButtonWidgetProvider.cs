@@ -15,7 +15,7 @@ namespace EasyButtons;
 [MetaData("android.appwidget.provider", Resource = "@xml/easy_button_widget_info")]
 public class EasyButtonWidgetProvider : AppWidgetProvider
 {
-    private static readonly int[] SlotViewIds =
+    protected static readonly int[] SlotViewIds =
     [
         Resource.Id.widget_btn_0,
         Resource.Id.widget_btn_1,
@@ -27,57 +27,54 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
     {
         if (context is null || appWidgetManager is null || appWidgetIds is null) return;
         foreach (var id in appWidgetIds)
-            UpdateWidget(context, appWidgetManager, id);
+            UpdateWidget(context, appWidgetManager, id, Resource.Layout.easy_button_widget);
     }
 
-    /// <summary>Called from the app whenever buttons change so widgets stay current.</summary>
+    /// <summary>Called from the app whenever buttons change so all 2×2 widgets stay current.</summary>
     public static void UpdateAll(Context context)
+        => UpdateAllFor(context, typeof(EasyButtonWidgetProvider), Resource.Layout.easy_button_widget);
+
+    // ── Shared helpers used by all layout variants ──────────────────────────
+
+    protected static void UpdateAllFor(Context context, Type providerType, int layoutResource)
     {
         var manager = AppWidgetManager.GetInstance(context);
         if (manager is null) return;
-        var provider = new ComponentName(context, Java.Lang.Class.FromType(typeof(EasyButtonWidgetProvider)));
+        var provider = new ComponentName(context, Java.Lang.Class.FromType(providerType));
         var ids = manager.GetAppWidgetIds(provider);
         if (ids is null || ids.Length == 0) return;
         foreach (var id in ids)
-            UpdateWidget(context, manager, id);
+            UpdateWidget(context, manager, id, layoutResource);
     }
 
-    private static void UpdateWidget(Context context, AppWidgetManager manager, int widgetId)
+    protected static void UpdateWidget(Context context, AppWidgetManager manager, int widgetId, int layoutResource)
     {
         var buttons = LoadButtons(context);
-        var views = new RemoteViews(context.PackageName!, Resource.Layout.easy_button_widget);
+        var views = new RemoteViews(context.PackageName!, layoutResource);
 
         for (int i = 0; i < 4; i++)
         {
             var viewId = SlotViewIds[i];
+
+            // Each slot gets a unique data URI → filterEquals is distinct per slot,
+            // guaranteeing Android treats these as 4 separate PendingIntents.
+            var tapIntent = new Intent(context, typeof(WidgetActionReceiver));
+            tapIntent.SetAction(WidgetActionReceiver.Action);
+            tapIntent.SetData(Android.Net.Uri.Parse($"easybtn://slot/{i}"));
+            tapIntent.PutExtra("slot_index", i);
+            var pi = PendingIntent.GetBroadcast(context, i, tapIntent,
+                PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
+
             if (i < buttons.Count)
             {
                 var btn = buttons[i];
                 views.SetImageViewBitmap(viewId, CreateButtonBitmap(btn.Label, btn.Color, 200));
-
-                PendingIntent pi;
-                if (!string.IsNullOrEmpty(btn.SoundPath))
-                {
-                    var intent = new Intent(context, typeof(WidgetSoundReceiver));
-                    intent.SetAction(WidgetSoundReceiver.ActionPlaySound);
-                    intent.PutExtra("sound_path", btn.SoundPath);
-                    pi = PendingIntent.GetBroadcast(context, i, intent,
-                        PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
-                }
-                else
-                {
-                    var uri = Android.Net.Uri.Parse(btn.Uri);
-                    var intent = new Intent(Intent.ActionView, uri);
-                    intent.AddFlags(ActivityFlags.NewTask);
-                    pi = PendingIntent.GetActivity(context, i + 100, intent,
-                        PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
-                }
                 views.SetOnClickPendingIntent(viewId, pi);
             }
             else
             {
                 views.SetImageViewBitmap(viewId, CreateEmptyBitmap(200));
-                views.SetOnClickPendingIntent(viewId, null);
+                views.SetOnClickPendingIntent(viewId, pi); // no-op tap (no button at this slot)
             }
         }
 
@@ -100,7 +97,7 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
 
     // ── Bitmap rendering ────────────────────────────────────────────────────────
 
-    private static Bitmap CreateButtonBitmap(string label, string hexColor, int size)
+    protected static Bitmap CreateButtonBitmap(string label, string hexColor, int size)
     {
         var bitmap = Bitmap.CreateBitmap(size, size, Bitmap.Config.Argb8888!)!;
         using var canvas = new Canvas(bitmap);
@@ -144,7 +141,7 @@ public class EasyButtonWidgetProvider : AppWidgetProvider
         return bitmap;
     }
 
-    private static Bitmap CreateEmptyBitmap(int size)
+    protected static Bitmap CreateEmptyBitmap(int size)
     {
         var bitmap = Bitmap.CreateBitmap(size, size, Bitmap.Config.Argb8888!)!;
         using var canvas = new Canvas(bitmap);

@@ -37,9 +37,9 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
     [RelayCommand]
     private async Task LaunchAsync(EasyButton button)
     {
-        if (!string.IsNullOrEmpty(button.SoundPath))
+        // SoundPath must be a real existing file — ignore stale sentinel values (e.g. "click")
+        if (!string.IsNullOrEmpty(button.SoundPath) && File.Exists(button.SoundPath))
         {
-            // Sound button — play the file, no URI launch
             sound.Play(button.SoundPath);
             return;
         }

@@ -9,5 +9,7 @@ public static class WidgetHelper
     {
         var ctx = Android.App.Application.Context;
         EasyButtonWidgetProvider.UpdateAll(ctx);
+        EasyButtonWidgetProviderV.UpdateAll(ctx);
+        EasyButtonWidgetProviderH.UpdateAll(ctx);
     }
 }
