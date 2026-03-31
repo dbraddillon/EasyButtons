@@ -103,35 +103,62 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <!-- Sound picker (Pro feature) -->
+            <!-- Sound mode selector -->
             <VerticalStackLayout Spacing="8">
                 <Label Text="SOUND" FontSize="11" FontAttributes="Bold"
                        TextColor="#888" CharacterSpacing="0.5" />
+
+                <!-- Off -->
                 <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
-                        BackgroundColor="#222222" Padding="14,10">
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                        <Label Grid.Column="0"
-                               Text="{Binding SoundName}"
-                               TextColor="#CCCCCC"
-                               VerticalTextAlignment="Center"
-                               FontSize="15" />
-                        <Button Grid.Column="1"
-                                Text="Choose"
-                                Command="{Binding PickSoundCommand}"
-                                BackgroundColor="#333" TextColor="White"
-                                FontSize="13" Padding="12,6"
-                                CornerRadius="8" HeightRequest="36" />
-                        <Button Grid.Column="2"
-                                Text="✕"
-                                IsVisible="{Binding HasSound}"
-                                Command="{Binding RemoveSoundCommand}"
-                                BackgroundColor="Transparent" TextColor="#888"
-                                FontSize="16" Padding="8,0"
-                                CornerRadius="8" HeightRequest="36" />
+                        BackgroundColor="#222222" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="off" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Label Grid.Column="0" Text="✓" TextColor="#E53935"
+                               FontAttributes="Bold" FontSize="16"
+                               IsVisible="{Binding SoundIsOff}"
+                               WidthRequest="28" />
+                        <Label Grid.Column="1" Text="Silent" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
                     </Grid>
                 </Border>
-                <Label Text="🔒 Pro — custom sounds require EasyButtons Pro"
-                       FontSize="12" TextColor="#555" />
+
+                <!-- Click (free) -->
+                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                        BackgroundColor="#222222" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="click" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="✓" TextColor="#E53935"
+                               FontAttributes="Bold" FontSize="16"
+                               IsVisible="{Binding SoundIsClick}"
+                               WidthRequest="28" />
+                        <Label Grid.Column="1" Text="🔊 Click" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="2" Text="Free" TextColor="#555" FontSize="12" VerticalTextAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Custom file (Pro) -->
+                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                        BackgroundColor="#222222" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="custom" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="✓" TextColor="#E53935"
+                               FontAttributes="Bold" FontSize="16"
+                               IsVisible="{Binding SoundIsCustom}"
+                               WidthRequest="28" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="🎵 Custom file" TextColor="White" FontSize="15" />
+                            <Label Text="{Binding CustomSoundName}"
+                                   TextColor="#666" FontSize="12"
+                                   IsVisible="{Binding SoundIsCustom}" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="🔒 Pro" TextColor="#555" FontSize="12" VerticalTextAlignment="Center" />
+                    </Grid>
+                </Border>
             </VerticalStackLayout>
 
             <!-- Delete button (edit mode only) -->

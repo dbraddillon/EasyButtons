@@ -19,15 +19,25 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
     [ObservableProperty] private bool _isEdit;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SoundName))]
-    [NotifyPropertyChangedFor(nameof(HasSound))]
+    [NotifyPropertyChangedFor(nameof(SoundMode))]
+    [NotifyPropertyChangedFor(nameof(SoundIsOff))]
+    [NotifyPropertyChangedFor(nameof(SoundIsClick))]
+    [NotifyPropertyChangedFor(nameof(SoundIsCustom))]
+    [NotifyPropertyChangedFor(nameof(CustomSoundName))]
     private string? _soundPath;
 
-    public string SoundName => string.IsNullOrEmpty(SoundPath)
-        ? "None"
-        : Path.GetFileNameWithoutExtension(SoundPath);
+    // "off" | "click" | "custom"
+    public string SoundMode =>
+        string.IsNullOrEmpty(SoundPath) ? "off" :
+        SoundPath == SoundService.ClickSentinel ? "click" : "custom";
 
-    public bool HasSound => !string.IsNullOrEmpty(SoundPath);
+    public bool SoundIsOff    => SoundMode == "off";
+    public bool SoundIsClick  => SoundMode == "click";
+    public bool SoundIsCustom => SoundMode == "custom";
+
+    public string CustomSoundName => SoundIsCustom
+        ? Path.GetFileNameWithoutExtension(SoundPath!)
+        : "Choose file…";
 
     // Preset colors for the picker
     public List<string> PresetColors { get; } =
@@ -100,18 +110,37 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
     private void SelectColor(string color) => Color = color;
 
     [RelayCommand]
-    private async Task PickSoundAsync()
+    private async Task SetSoundModeAsync(string mode)
     {
-        if (!pro.IsPro)
+        switch (mode)
         {
-            var upgrade = await Shell.Current.DisplayAlertAsync(
-                "Pro Feature",
-                "Custom sounds are available with EasyButtons Pro ($1.99 one-time).",
-                "Get Pro", "Not Now");
-            if (upgrade) await TryPurchaseAsync();
-            return;
-        }
+            case "off":
+                DeleteCustomFile();
+                SoundPath = null;
+                break;
 
+            case "click":
+                DeleteCustomFile();
+                SoundPath = SoundService.ClickSentinel; // free, no Pro gate
+                break;
+
+            case "custom":
+                if (!pro.IsPro)
+                {
+                    var upgrade = await Shell.Current.DisplayAlertAsync(
+                        "Pro Feature",
+                        "Custom audio files are available with EasyButtons Pro ($1.99 one-time).",
+                        "Get Pro", "Not Now");
+                    if (upgrade) await TryPurchaseAsync();
+                    return;
+                }
+                await PickCustomFileAsync();
+                break;
+        }
+    }
+
+    private async Task PickCustomFileAsync()
+    {
         var result = await FilePicker.PickAsync(new PickOptions
         {
             PickerTitle = "Choose a sound",
@@ -124,7 +153,6 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
 
         if (result is null) return;
 
-        // Copy into app-private sounds folder so it survives file manager moves
         var dir = Path.Combine(FileSystem.AppDataDirectory, "sounds");
         Directory.CreateDirectory(dir);
         var dest = Path.Combine(dir, $"{(_existing?.Id ?? Guid.NewGuid())}{Path.GetExtension(result.FileName)}");
@@ -132,12 +160,12 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
         SoundPath = dest;
     }
 
-    [RelayCommand]
-    private void RemoveSound()
+    private void DeleteCustomFile()
     {
-        if (SoundPath != null && File.Exists(SoundPath))
+        if (!string.IsNullOrEmpty(SoundPath) &&
+            SoundPath != SoundService.ClickSentinel &&
+            File.Exists(SoundPath))
             try { File.Delete(SoundPath); } catch { }
-        SoundPath = null;
     }
 
     private async Task TryPurchaseAsync()
