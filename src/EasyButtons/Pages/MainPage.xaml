@@ -12,6 +12,9 @@
     BackgroundColor="#111111">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="⭐ Upgrade to Pro"
+                     Command="{Binding UpgradeToProCommand}"
+                     Order="Secondary" />
         <ToolbarItem Text="Export Backup"
                      Command="{Binding ExportBackupCommand}"
                      Order="Secondary" />
@@ -49,9 +52,22 @@
         <!-- Button grid -->
         <ScrollView Grid.Row="0" IsVisible="{Binding IsEmpty, Converter={StaticResource InvertBoolConverter}}">
             <CollectionView
-                ItemsSource="{Binding Buttons}"
+                ItemsSource="{Binding GroupedButtons}"
+                IsGrouped="True"
                 SelectionMode="None"
                 Margin="16,16,16,80">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="vm:ButtonGroup">
+                        <Label
+                            Text="{Binding Name}"
+                            IsVisible="{Binding HasName}"
+                            TextColor="#AAA"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            CharacterSpacing="0.5"
+                            Padding="6,12,6,4" />
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12" />
                 </CollectionView.ItemsLayout>

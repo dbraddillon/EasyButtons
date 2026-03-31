@@ -16,7 +16,7 @@ namespace EasyButtons;
     Name = "com.voluntarytransactions.easybuttons.WidgetConfigureActivity",
     Label = "Configure Widget",
     Exported = true,
-    Theme = "@style/Maui.MainTheme.NoActionBar")]
+    Theme = "@android:style/Theme.DeviceDefault.NoActionBar")]
 public class WidgetConfigureActivity : Activity
 {
     internal const string PrefsName = "EasyButtonsWidgetPrefs";
@@ -43,6 +43,13 @@ public class WidgetConfigureActivity : Activity
             return;
         }
 
+        // V/H widget layouts are Pro-only — gate before showing configure UI
+        if (IsProOnlyWidget() && !IsProPurchased())
+        {
+            ShowProUpsellAndExit();
+            return;
+        }
+
         // Pre-load any existing config for this widget (re-configure case)
         var prefs = GetSharedPreferences(PrefsName, FileCreationMode.Private);
         var existing = prefs?.GetString($"config_{_appWidgetId}", null);
@@ -52,7 +59,8 @@ public class WidgetConfigureActivity : Activity
 
         SetContentView(Resource.Layout.widget_configure);
 
-        _saveButton = FindViewById<Android.Widget.Button>(Resource.Id.btn_save)!;
+        _saveButton = FindViewById<Android.Widget.Button>(Resource.Id.btn_save);
+        if (_saveButton == null) { Finish(); return; }
         _saveButton.Click += OnSaveClick;
 
         _allButtons.AddRange(LoadAllButtons());
@@ -103,6 +111,7 @@ public class WidgetConfigureActivity : Activity
                 ViewGroup.LayoutParams.WrapContent)
         };
         row.SetPadding(Dp(16), Dp(10), Dp(16), Dp(10));
+        row.SetGravity(GravityFlags.CenterVertical);
 
         // Ripple so it feels tappable
         var ripple = new Android.Util.TypedValue();
@@ -227,6 +236,50 @@ public class WidgetConfigureActivity : Activity
             return [.. db.Table<EasyButton>().OrderBy(b => b.SortOrder)];
         }
         catch { return []; }
+    }
+
+    // ── Pro gating ──────────────────────────────────────────────────────────────
+
+    /// <summary>V/H layouts require Pro; the standard 2×2 is free.</summary>
+    private bool IsProOnlyWidget()
+    {
+        var manager = AppWidgetManager.GetInstance(this);
+        var info = manager?.GetAppWidgetInfo(_appWidgetId);
+        var className = info?.Provider?.ClassName ?? "";
+        return className.Contains("ProviderV") || className.Contains("ProviderH");
+    }
+
+    // Uses native SharedPreferences directly — MAUI.Storage.Preferences requires the
+    // MAUI runtime to be initialized, which hasn't happened when this Activity is launched
+    // cold from the home screen widget picker.
+    private bool IsProPurchased()
+    {
+        // MAUI stores Preferences in {packageName}_preferences via PreferenceManager defaults
+        var prefsFile = PackageName + "_preferences";
+#if DEBUG
+        try
+        {
+            var p = GetSharedPreferences(prefsFile, FileCreationMode.Private);
+            if (p?.GetBoolean("debug_is_pro", false) == true) return true;
+        }
+        catch { }
+#endif
+        try
+        {
+            var p = GetSharedPreferences(prefsFile, FileCreationMode.Private);
+            return p?.GetBoolean("is_pro_purchased", false) == true;
+        }
+        catch { return false; }
+    }
+
+    private void ShowProUpsellAndExit()
+    {
+        new AlertDialog.Builder(this)!
+            .SetTitle("EasyButtons Pro")!
+            .SetMessage("Vertical and horizontal widget layouts are included in EasyButtons Pro ($1.99 one-time). Upgrade in the app to unlock all widget types.")!
+            .SetPositiveButton("OK", (_, _) => Finish())!
+            .SetCancelable(false)!
+            .Show();
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

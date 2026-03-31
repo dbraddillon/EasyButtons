@@ -6,5 +6,13 @@
   "contactEmail": "voluntarytransactions@gmail.com",
   "contactWebsite": "https://voluntarytransactions.com",
   "privacyPolicyUrl": "https://voluntarytransactions.com/easybuttons-privacy-policy.html",
-  "iapProducts": []
+  "iapProducts": [
+    {
+      "sku": "com.voluntarytransactions.easybuttons.pro",
+      "type": "inapp",
+      "price": "1.99",
+      "title": "EasyButtons Pro",
+      "description": "Unlimited buttons, all widget layouts, widget customization, and groups/folders. One-time purchase, no subscription."
+    }
+  ]
 }

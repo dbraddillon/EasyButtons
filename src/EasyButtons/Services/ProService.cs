@@ -1,18 +1,19 @@
+#if !DEBUG
+using Plugin.InAppBilling;
+#endif
+
 namespace EasyButtons.Services;
 
 /// <summary>
 /// Controls Pro feature access.
-/// Free tier: up to FreeButtonLimit buttons.
-/// Pro ($1.99 one-time): unlimited buttons + custom sounds per button.
+/// Free tier: up to FreeButtonLimit buttons, 2×2 widget (auto-fill only).
+/// Pro ($1.99 one-time): unlimited buttons, all widget layouts, widget configure, groups/folders.
 /// IAP SKU: com.voluntarytransactions.easybuttons.pro
-///
-/// NOTE: Plugin.InAppBilling conflicts with .NET 10 Android billing AAR in debug builds.
-/// Real purchase flow wired when building release. Debug toggle covers all testing.
 /// </summary>
 public class ProService
 {
     public const int FreeButtonLimit = 4;
-    private const string ProSku = "com.voluntarytransactions.easybuttons.pro";
+    public const string ProSku = "com.voluntarytransactions.easybuttons.pro";
     private const string CacheKey = "is_pro_purchased";
 
     private bool _isPro = false;
@@ -28,21 +29,61 @@ public class ProService
         }
     }
 
-    /// <summary>
-    /// Call on app start and resume. Uses cached value until IAP package is wired for release.
-    /// </summary>
-    public Task RefreshAsync()
+    /// <summary>Call on app start and resume.</summary>
+    public async Task RefreshAsync()
     {
-        // TODO (release): CrossInAppBilling.GetPurchasesAsync → set _isPro → cache
+#if DEBUG
         _isPro = Preferences.Get(CacheKey, false);
-        return Task.CompletedTask;
+        await Task.CompletedTask;
+#else
+        // Fast path: cached purchase → no network call needed
+        if (Preferences.Get(CacheKey, false)) { _isPro = true; return; }
+        try
+        {
+            if (!CrossInAppBilling.IsSupported) return;
+            var billing = CrossInAppBilling.Current;
+            if (!await billing.ConnectAsync()) return;
+            var purchases = await billing.GetPurchasesAsync(ItemType.InAppPurchase);
+            _isPro = purchases?.Any(p =>
+                p.ProductId == ProSku &&
+                p.State == PurchaseState.Purchased) == true;
+            if (_isPro) Preferences.Set(CacheKey, true);
+        }
+        catch { _isPro = Preferences.Get(CacheKey, false); }
+        finally
+        {
+            try { await CrossInAppBilling.Current.DisconnectAsync(); } catch { }
+        }
+#endif
     }
 
-    /// <summary>Trigger the Play Store purchase sheet.</summary>
-    public Task<bool> PurchaseAsync()
+    /// <summary>Trigger the Play Store purchase sheet. Returns true if purchase succeeded.</summary>
+    public async Task<bool> PurchaseAsync()
     {
-        // TODO (release): CrossInAppBilling.PurchaseAsync → set _isPro → Preferences.Set(CacheKey, true)
-        return Task.FromResult(false);
+#if DEBUG
+        return false; // Use debug toggle in the debug bar
+#else
+        if (_isPro) return true;
+        try
+        {
+            if (!CrossInAppBilling.IsSupported) return false;
+            var billing = CrossInAppBilling.Current;
+            if (!await billing.ConnectAsync()) return false;
+            var purchase = await billing.PurchaseAsync(ProSku, ItemType.InAppPurchase);
+            if (purchase?.State == PurchaseState.Purchased)
+            {
+                _isPro = true;
+                Preferences.Set(CacheKey, true);
+                return true;
+            }
+            return false;
+        }
+        catch { return false; }
+        finally
+        {
+            try { await CrossInAppBilling.Current.DisconnectAsync(); } catch { }
+        }
+#endif
     }
 
 #if DEBUG

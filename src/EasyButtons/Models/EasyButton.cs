@@ -15,4 +15,6 @@ public class EasyButton
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     /// <summary>Path to a sound file. When set, tapping the button plays this sound instead of launching a URI.</summary>
     public string? SoundPath { get; set; }
+    /// <summary>Optional group/folder label. Pro feature.</summary>
+    public string? GroupName { get; set; }
 }

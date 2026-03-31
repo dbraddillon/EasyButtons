@@ -3,11 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using EasyButtons.Helpers;
 using EasyButtons.Models;
 using EasyButtons.Repositories;
+using EasyButtons.Services;
 
 namespace EasyButtons.ViewModels;
 
 [QueryProperty(nameof(ButtonId), "buttonId")]
-public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewModel
+public partial class EditButtonViewModel(EasyButtonRepository repo, ProService pro) : BaseViewModel
 {
     private EasyButton? _existing;
 
@@ -16,6 +17,13 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
     [ObservableProperty] private string _uri = string.Empty;
     [ObservableProperty] private string _color = "#E53935";
     [ObservableProperty] private bool _isEdit;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(GroupSectionVisible))]
+    private string? _groupName;
+
+    public bool IsPro => pro.IsPro;
+    public bool GroupSectionVisible => pro.IsPro;
 
     // Action mode: 0 = Open URI, 1 = Play sound
     [ObservableProperty]
@@ -63,6 +71,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         Uri = _existing.Uri;
         Color = _existing.Color;
         SoundPath = _existing.SoundPath;
+        GroupName = _existing.GroupName;
         ActionMode = string.IsNullOrEmpty(_existing.SoundPath) ? 0 : 1;
         IsEdit = true;
     }
@@ -91,6 +100,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         button.Uri = IsUriMode ? Uri.Trim() : string.Empty;
         button.Color = Color;
         button.SoundPath = IsSoundMode ? SoundPath : null;
+        button.GroupName = pro.IsPro ? GroupName?.Trim() : null;
 
         await repo.SaveAsync(button);
 #if ANDROID
@@ -151,6 +161,21 @@ public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewMo
         var dest = Path.Combine(dir, $"{(_existing?.Id ?? Guid.NewGuid())}{Path.GetExtension(result.FileName)}");
         File.Copy(result.FullPath, dest, overwrite: true);
         SoundPath = dest;
+    }
+
+    [RelayCommand]
+    private async Task UpgradeToProAsync()
+    {
+        var purchased = await pro.PurchaseAsync();
+        if (purchased)
+        {
+            OnPropertyChanged(nameof(IsPro));
+            OnPropertyChanged(nameof(GroupSectionVisible));
+        }
+        else
+        {
+            await Shell.Current.DisplayAlertAsync("Purchase", "Purchase could not be completed. Try again later.", "OK");
+        }
     }
 
     private void DeleteSoundFile()

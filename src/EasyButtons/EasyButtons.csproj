@@ -19,10 +19,16 @@
 		<MauiFont Include="Resources\Fonts\*" />
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+	<!-- Legacy manifest merger avoids AAPT2 strict namespace conflict between Plugin.InAppBilling and .NET 10 billing AAR -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidManifestMerger>legacy</AndroidManifestMerger>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<!-- Plugin.InAppBilling: add when building release — conflicts with .NET 10 Android billing AAR in debug builds -->
-		<!-- <PackageReference Include="Plugin.InAppBilling" Version="7.1.2" /> -->
-<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<!-- Plugin.InAppBilling: Release only — 10.0.0 targets net10.0-android36.0, avoids billing AAR namespace conflict -->
+		<PackageReference Include="Plugin.InAppBilling" Version="10.0.0"
+		                  Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.41" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />

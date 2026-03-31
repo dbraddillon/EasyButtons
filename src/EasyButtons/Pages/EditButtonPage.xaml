@@ -147,6 +147,38 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
+            <!-- Group / Folder (Pro only) -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="GROUP" FontSize="11" FontAttributes="Bold"
+                       TextColor="#888" CharacterSpacing="0.5" />
+
+                <!-- Pro unlocked: show group entry -->
+                <VerticalStackLayout IsVisible="{Binding GroupSectionVisible}" Spacing="6">
+                    <Border StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#222222" Padding="16,12">
+                        <Entry Text="{Binding GroupName}"
+                               Placeholder="e.g. Work, Music, Morning Routine…"
+                               PlaceholderColor="#555"
+                               TextColor="White"
+                               BackgroundColor="Transparent"
+                               ReturnType="Done" />
+                    </Border>
+                    <Label Text="Leave blank for no group." FontSize="12" TextColor="#555" />
+                </VerticalStackLayout>
+
+                <!-- Not Pro: locked state -->
+                <Border IsVisible="{Binding GroupSectionVisible, Converter={StaticResource InvertBoolConverter}}"
+                        StrokeShape="RoundRectangle 12" StrokeThickness="1"
+                        Stroke="#333" BackgroundColor="#1A1A1A" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UpgradeToProCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Groups &amp; folders" TextColor="#666" FontSize="15" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" Text="⭐ Pro" TextColor="#F9A825" FontSize="13" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
             <!-- Delete button (edit mode only) -->
             <Button
                 IsVisible="{Binding IsEdit}"

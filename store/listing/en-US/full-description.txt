@@ -13,7 +13,11 @@ Each button is a shortcut to anything your phone can open:
 • Custom URI schemes — trigger any deep link or app action
 • Sound buttons — tap to play any audio file (sound effects, voice clips, whatever)
 
-Up to 4 buttons. Pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+Create up to 4 buttons for free. Pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+
+── HOME SCREEN WIDGETS ──
+
+Put your buttons right on your home screen — no need to open the app at all. Choose from multiple widget layouts to fit your setup.
 
 ── WHY EASY BUTTONS ──
 
@@ -22,3 +26,13 @@ Inspired by the classic "That was easy" button — the idea that some things sho
 ── BACKUP & RESTORE ──
 
 Export all your buttons to a JSON file anytime. Import them back on any device or after a reinstall. Your setup is always safe.
+
+── EASYBUTTONS PRO ──
+
+Unlock everything for a one-time $1.99 purchase:
+• Unlimited buttons — no cap
+• All widget layouts (vertical column, horizontal row, 2×2 grid)
+• Per-widget button selection — pick exactly which buttons appear in each widget
+• Groups & folders — organize buttons into named sections
+
+No subscription. Pay once, keep it forever.

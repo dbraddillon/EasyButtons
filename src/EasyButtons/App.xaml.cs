@@ -15,6 +15,12 @@ public partial class App : Application
     protected override Window CreateWindow(IActivationState? activationState)
         => new Window(new AppShell());
 
+    protected override void OnStart()
+    {
+        base.OnStart();
+        _ = _pro.RefreshAsync();
+    }
+
     protected override void OnResume()
     {
         base.OnResume();

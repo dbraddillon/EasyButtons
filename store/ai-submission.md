@@ -1,14 +1,15 @@
 # EasyButtons — AI Store Submission Guide
 
-Navigate to https://play.google.com/console and open (or create) the EasyButtons app.
+Navigate to https://play.google.com/console and open the EasyButtons app.
 Paste values from code blocks exactly. Confirm each field before moving to the next section.
 
 ---
 
 ## Status
 
-- [ ] App created in Play Console
+- [x] App created in Play Console
 - [ ] Service account has Releases + Store presence permissions
+- [ ] In-app product created (easybuttons_pro)
 - [ ] Phase 1 complete (all text/form fields)
 - [ ] Images uploaded (icon, feature graphic, screenshots)
 - [ ] Phase 2 complete (verification sweep, no draft blockers)
@@ -22,17 +23,6 @@ Paste values from code blocks exactly. Confirm each field before moving to the n
 Play Console → Users and permissions → verify `play-store-service-account` has:
 - ✅ Release to production, exclude devices, and use app signing by Google Play
 - ✅ Manage store presence (required for Claude's update_listing API call — without this it returns 403)
-
----
-
-## Part 0 — Create app (skip if already exists)
-
-Play Console → All apps → Create app
-- App name: `EasyButtons: One-Tap Launcher`
-- Default language: English (United States)
-- App or game: App
-- Free or paid: Free
-- Accept declarations → Create app
 
 ---
 
@@ -71,7 +61,11 @@ Each button is a shortcut to anything your phone can open:
 • Custom URI schemes — trigger any deep link or app action
 • Sound buttons — tap to play any audio file (sound effects, voice clips, whatever)
 
-Up to 4 buttons. Pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+Create up to 4 buttons for free. Pick colors, name them whatever makes sense to you. Long-press any button to edit or delete it.
+
+── HOME SCREEN WIDGETS ──
+
+Put your buttons right on your home screen — no need to open the app at all. Choose from multiple widget layouts to fit your setup.
 
 ── WHY EASY BUTTONS ──
 
@@ -80,6 +74,16 @@ Inspired by the classic "That was easy" button — the idea that some things sho
 ── BACKUP & RESTORE ──
 
 Export all your buttons to a JSON file anytime. Import them back on any device or after a reinstall. Your setup is always safe.
+
+── EASYBUTTONS PRO ──
+
+Unlock everything for a one-time $1.99 purchase:
+• Unlimited buttons — no cap
+• All widget layouts (vertical column, horizontal row, 2×2 grid)
+• Per-widget button selection — pick exactly which buttons appear in each widget
+• Groups & folders — organize buttons into named sections
+
+No subscription. Pay once, keep it forever.
 ```
 
 **Category:** Tools
@@ -113,7 +117,23 @@ https://voluntarytransactions.com/easybuttons-privacy-policy.html
 
 ---
 
-## Part 2 — Content rating (IARC questionnaire)
+## Part 2 — In-app products
+
+Play Console → Monetize → In-app products → Create product
+
+| Field | Value |
+|---|---|
+| Product ID | `com.voluntarytransactions.easybuttons.pro` |
+| Name | `EasyButtons Pro` |
+| Description | `Unlimited buttons, all widget layouts, widget customization, and groups/folders. One-time purchase, no subscription.` |
+| Price | $1.99 USD |
+| Status | **Active** |
+
+Save → Activate. The product must be Active before the billing library will return it.
+
+---
+
+## Part 3 — Content rating (IARC questionnaire)
 
 Play Console → Content ratings → Start questionnaire
 - Category: **Utility**
@@ -132,7 +152,7 @@ Expected rating: **Everyone**
 
 ---
 
-## Part 3 — Data safety
+## Part 4 — Data safety
 
 Play Console → Data safety
 
@@ -160,7 +180,7 @@ Play Console → Data safety
 
 ---
 
-## Part 4 — App access, ads, target audience
+## Part 5 — App access, ads, target audience
 
 **App access:** All functionality is available without special access
 
@@ -178,9 +198,9 @@ The following must be uploaded manually — browser AI cannot do file uploads:
 
 1. **App icon** (512×512 PNG): `store/graphics/icon-512.png`
 2. **Feature graphic** (1024×500 PNG): `store/graphics/feature-graphic.png`
-3. **Phone screenshots**: `store/graphics/screenshots/en-US/` (add after first real-device build)
+3. **Phone screenshots**: `store/graphics/screenshots/en-US/` — need at least 2 (build release APK on device first, no debug banner)
 
-Tell the user: "Please upload the app icon and feature graphic from the store/graphics/ folder in the EasyButtons repo, then let me know when done."
+Tell the user: "Please upload the app icon, feature graphic, and screenshots from the store/graphics/ folder, then let me know when done."
 
 ---
 
@@ -188,21 +208,22 @@ Tell the user: "Please upload the app icon and feature graphic from the store/gr
 
 ---
 
-## Part 5 — AAB upload
+## Part 6 — AAB upload
 
 If not already uploaded:
 - Play Console → Internal testing → Create new release
-- Upload `bin/Release/net10.0-android/com.voluntarytransactions.easybuttons-Signed.aab`
+- Upload the signed AAB from `src/EasyButtons/bin/Release/net10.0-android/com.voluntarytransactions.easybuttons-Signed.aab`
 - Release notes:
 ```
-Initial release — create big colorful dome buttons that launch any app, website, URI, or sound in one tap. Long-press to edit. Export/import backup included.
+Big, satisfying one-tap buttons for anything you launch repeatedly — apps, links, calls, navigation, sounds. Home screen widgets. EasyButtons Pro unlocks unlimited buttons, all widget layouts, and groups.
 ```
 - Save → Review release → Start rollout to Internal testing
 
-## Part 6 — Verification sweep
+## Part 7 — Verification sweep
 
 Go through each section in Play Console and confirm green/complete:
 - [ ] Store listing — title, descriptions, category, contact, privacy policy
+- [ ] In-app products — easybuttons_pro Active
 - [ ] Content rating — complete, shows "Everyone"
 - [ ] Data safety — complete
 - [ ] App access — declared
