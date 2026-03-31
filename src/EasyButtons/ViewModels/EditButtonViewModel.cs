@@ -3,12 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using EasyButtons.Helpers;
 using EasyButtons.Models;
 using EasyButtons.Repositories;
-using EasyButtons.Services;
 
 namespace EasyButtons.ViewModels;
 
 [QueryProperty(nameof(ButtonId), "buttonId")]
-public partial class EditButtonViewModel(EasyButtonRepository repo, ProService pro) : BaseViewModel
+public partial class EditButtonViewModel(EasyButtonRepository repo) : BaseViewModel
 {
     private EasyButton? _existing;
 
@@ -18,26 +17,22 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
     [ObservableProperty] private string _color = "#E53935";
     [ObservableProperty] private bool _isEdit;
 
+    // Action mode: 0 = Open URI, 1 = Play sound
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SoundMode))]
-    [NotifyPropertyChangedFor(nameof(SoundIsOff))]
-    [NotifyPropertyChangedFor(nameof(SoundIsClick))]
-    [NotifyPropertyChangedFor(nameof(SoundIsCustom))]
-    [NotifyPropertyChangedFor(nameof(CustomSoundName))]
+    [NotifyPropertyChangedFor(nameof(IsUriMode))]
+    [NotifyPropertyChangedFor(nameof(IsSoundMode))]
+    private int _actionMode;
+
+    public bool IsUriMode   => ActionMode == 0;
+    public bool IsSoundMode => ActionMode == 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SoundFileName))]
     private string? _soundPath;
 
-    // "off" | "click" | "custom"
-    public string SoundMode =>
-        string.IsNullOrEmpty(SoundPath) ? "off" :
-        SoundPath == SoundService.ClickSentinel ? "click" : "custom";
-
-    public bool SoundIsOff    => SoundMode == "off";
-    public bool SoundIsClick  => SoundMode == "click";
-    public bool SoundIsCustom => SoundMode == "custom";
-
-    public string CustomSoundName => SoundIsCustom
-        ? Path.GetFileNameWithoutExtension(SoundPath!)
-        : "Choose file…";
+    public string SoundFileName => string.IsNullOrEmpty(SoundPath)
+        ? "Choose file…"
+        : Path.GetFileNameWithoutExtension(SoundPath);
 
     // Preset colors for the picker
     public List<string> PresetColors { get; } =
@@ -68,6 +63,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
         Uri = _existing.Uri;
         Color = _existing.Color;
         SoundPath = _existing.SoundPath;
+        ActionMode = string.IsNullOrEmpty(_existing.SoundPath) ? 0 : 1;
         IsEdit = true;
     }
 
@@ -79,17 +75,22 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
             await Shell.Current.DisplayAlertAsync("Required", "Enter a label.", "OK");
             return;
         }
-        if (string.IsNullOrWhiteSpace(Uri))
+        if (IsUriMode && string.IsNullOrWhiteSpace(Uri))
         {
             await Shell.Current.DisplayAlertAsync("Required", "Enter a URL or URI.", "OK");
+            return;
+        }
+        if (IsSoundMode && string.IsNullOrEmpty(SoundPath))
+        {
+            await Shell.Current.DisplayAlertAsync("Required", "Choose a sound file.", "OK");
             return;
         }
 
         var button = _existing ?? new EasyButton();
         button.Label = Label.Trim();
-        button.Uri = Uri.Trim();
+        button.Uri = IsUriMode ? Uri.Trim() : string.Empty;
         button.Color = Color;
-        button.SoundPath = SoundPath;
+        button.SoundPath = IsSoundMode ? SoundPath : null;
 
         await repo.SaveAsync(button);
         await Shell.Current.GoToAsync("..");
@@ -102,6 +103,7 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
         var confirmed = await Shell.Current.DisplayAlertAsync(
             "Delete", $"Delete \"{_existing.Label}\"?", "Delete", "Cancel");
         if (!confirmed) return;
+        DeleteSoundFile();
         await repo.DeleteAsync(_existing.Id);
         await Shell.Current.GoToAsync("..");
     }
@@ -110,36 +112,21 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
     private void SelectColor(string color) => Color = color;
 
     [RelayCommand]
-    private async Task SetSoundModeAsync(string mode)
+    private void SetActionMode(string? parameter)
     {
-        switch (mode)
-        {
-            case "off":
-                DeleteCustomFile();
-                SoundPath = null;
-                break;
+        if (!int.TryParse(parameter, out var mode)) return;
+        if (mode == ActionMode) return;
 
-            case "click":
-                DeleteCustomFile();
-                SoundPath = SoundService.ClickSentinel; // free, no Pro gate
-                break;
+        // Switching away from sound mode — clean up the copied file
+        if (ActionMode == 1 && mode == 0)
+            DeleteSoundFile();
 
-            case "custom":
-                if (!pro.IsPro)
-                {
-                    var upgrade = await Shell.Current.DisplayAlertAsync(
-                        "Pro Feature",
-                        "Custom audio files are available with EasyButtons Pro ($1.99 one-time).",
-                        "Get Pro", "Not Now");
-                    if (upgrade) await TryPurchaseAsync();
-                    return;
-                }
-                await PickCustomFileAsync();
-                break;
-        }
+        ActionMode = mode;
+        if (mode == 0) SoundPath = null;
     }
 
-    private async Task PickCustomFileAsync()
+    [RelayCommand]
+    private async Task PickSoundAsync()
     {
         var result = await FilePicker.PickAsync(new PickOptions
         {
@@ -160,20 +147,10 @@ public partial class EditButtonViewModel(EasyButtonRepository repo, ProService p
         SoundPath = dest;
     }
 
-    private void DeleteCustomFile()
+    private void DeleteSoundFile()
     {
-        if (!string.IsNullOrEmpty(SoundPath) &&
-            SoundPath != SoundService.ClickSentinel &&
-            File.Exists(SoundPath))
+        if (!string.IsNullOrEmpty(SoundPath) && File.Exists(SoundPath))
             try { File.Delete(SoundPath); } catch { }
-    }
-
-    private async Task TryPurchaseAsync()
-    {
-        var ok = await pro.PurchaseAsync();
-        if (!ok)
-            await Shell.Current.DisplayAlertAsync("Coming Soon",
-                "Pro purchase will be available in the next update.", "OK");
     }
 
 #if ANDROID

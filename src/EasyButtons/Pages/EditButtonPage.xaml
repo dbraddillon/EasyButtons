@@ -58,23 +58,6 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- URI field -->
-            <VerticalStackLayout Spacing="8">
-                <Label Text="URL / URI" FontSize="11" FontAttributes="Bold"
-                       TextColor="#888" CharacterSpacing="0.5" />
-                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#222222" Padding="16,12">
-                    <Entry Text="{Binding Uri}"
-                           Placeholder="e.g. spotify:track:4uLU6hMCjMI75M1A2tKUQC"
-                           PlaceholderColor="#555"
-                           TextColor="White"
-                           BackgroundColor="Transparent"
-                           Keyboard="Url"
-                           ReturnType="Done" />
-                </Border>
-                <Label Text="Supports any URI: spotify:, https://, youtube://, google.navigation:q=Address, etc."
-                       FontSize="12" TextColor="#666" />
-            </VerticalStackLayout>
-
             <!-- Color picker -->
             <VerticalStackLayout Spacing="12">
                 <Label Text="COLOR" FontSize="11" FontAttributes="Bold"
@@ -103,62 +86,65 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <!-- Sound mode selector -->
+            <!-- Action -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="SOUND" FontSize="11" FontAttributes="Bold"
+                <Label Text="ACTION" FontSize="11" FontAttributes="Bold"
                        TextColor="#888" CharacterSpacing="0.5" />
 
-                <!-- Off -->
+                <!-- Open URI -->
                 <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
                         BackgroundColor="#222222" Padding="16,14">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="off" />
+                        <TapGestureRecognizer Command="{Binding SetActionModeCommand}" CommandParameter="0" />
                     </Border.GestureRecognizers>
                     <Grid ColumnDefinitions="Auto,*">
                         <Label Grid.Column="0" Text="✓" TextColor="#E53935"
                                FontAttributes="Bold" FontSize="16"
-                               IsVisible="{Binding SoundIsOff}"
+                               IsVisible="{Binding IsUriMode}"
                                WidthRequest="28" />
-                        <Label Grid.Column="1" Text="Silent" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" Text="🔗 Open URL / URI" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
                     </Grid>
                 </Border>
 
-                <!-- Click (free) -->
+                <!-- URI entry (visible when URI mode selected) -->
+                <VerticalStackLayout IsVisible="{Binding IsUriMode}" Spacing="6">
+                    <Border StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="#222222" Padding="16,12">
+                        <Entry Text="{Binding Uri}"
+                               Placeholder="e.g. spotify:track:4uLU6hMCjMI75M1A2tKUQC"
+                               PlaceholderColor="#555"
+                               TextColor="White"
+                               BackgroundColor="Transparent"
+                               Keyboard="Url"
+                               ReturnType="Done" />
+                    </Border>
+                    <Label Text="Supports any URI: spotify:, https://, youtube://, google.navigation:q=Address, etc."
+                           FontSize="12" TextColor="#666" />
+                </VerticalStackLayout>
+
+                <!-- Play sound -->
                 <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
                         BackgroundColor="#222222" Padding="16,14">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="click" />
+                        <TapGestureRecognizer Command="{Binding SetActionModeCommand}" CommandParameter="1" />
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Grid ColumnDefinitions="Auto,*">
                         <Label Grid.Column="0" Text="✓" TextColor="#E53935"
                                FontAttributes="Bold" FontSize="16"
-                               IsVisible="{Binding SoundIsClick}"
+                               IsVisible="{Binding IsSoundMode}"
                                WidthRequest="28" />
-                        <Label Grid.Column="1" Text="🔊 Click" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
-                        <Label Grid.Column="2" Text="Free" TextColor="#555" FontSize="12" VerticalTextAlignment="Center" />
+                        <Label Grid.Column="1" Text="🔊 Play sound" TextColor="White" FontSize="15" VerticalTextAlignment="Center" />
                     </Grid>
                 </Border>
 
-                <!-- Custom file (Pro) -->
-                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0"
-                        BackgroundColor="#222222" Padding="16,14">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SetSoundModeCommand}" CommandParameter="custom" />
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto">
-                        <Label Grid.Column="0" Text="✓" TextColor="#E53935"
-                               FontAttributes="Bold" FontSize="16"
-                               IsVisible="{Binding SoundIsCustom}"
-                               WidthRequest="28" />
-                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                            <Label Text="🎵 Custom file" TextColor="White" FontSize="15" />
-                            <Label Text="{Binding CustomSoundName}"
-                                   TextColor="#666" FontSize="12"
-                                   IsVisible="{Binding SoundIsCustom}" />
-                        </VerticalStackLayout>
-                        <Label Grid.Column="2" Text="🔒 Pro" TextColor="#555" FontSize="12" VerticalTextAlignment="Center" />
-                    </Grid>
-                </Border>
+                <!-- Sound file picker (visible when sound mode selected) -->
+                <VerticalStackLayout IsVisible="{Binding IsSoundMode}" Spacing="6">
+                    <Button Text="{Binding SoundFileName}"
+                            Command="{Binding PickSoundCommand}"
+                            BackgroundColor="#222222"
+                            TextColor="White"
+                            CornerRadius="12"
+                            FontSize="14" />
+                </VerticalStackLayout>
             </VerticalStackLayout>
 
             <!-- Delete button (edit mode only) -->

@@ -13,6 +13,6 @@ public class EasyButton
     public string Color { get; set; } = "#E53935";
     public int SortOrder { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    /// <summary>Path to custom sound file. Null = default tap sound. Pro feature.</summary>
+    /// <summary>Path to a sound file. When set, tapping the button plays this sound instead of launching a URI.</summary>
     public string? SoundPath { get; set; }
 }

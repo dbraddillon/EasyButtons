@@ -37,9 +37,12 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
     [RelayCommand]
     private async Task LaunchAsync(EasyButton button)
     {
-        // Play sound fire-and-forget — never delay the launch
         if (!string.IsNullOrEmpty(button.SoundPath))
+        {
+            // Sound button — play the file, no URI launch
             sound.Play(button.SoundPath);
+            return;
+        }
 
         var ok = await LaunchHelper.TryLaunchAsync(button.Uri);
         if (!ok)
@@ -60,7 +63,7 @@ public partial class MainViewModel(EasyButtonRepository repo, ProService pro, Ba
         {
             var upgrade = await Shell.Current.DisplayAlertAsync(
                 "Unlock Unlimited Buttons",
-                $"The free version supports up to {ProService.FreeButtonLimit} buttons.\n\nUpgrade to EasyButtons Pro for $1.99 to add unlimited buttons and custom sounds.",
+                $"The free version supports up to {ProService.FreeButtonLimit} buttons.\n\nUpgrade to EasyButtons Pro for $1.99 to add unlimited buttons.",
                 "Get Pro", "Not Now");
             if (upgrade)
                 await PurchaseProAsync();
