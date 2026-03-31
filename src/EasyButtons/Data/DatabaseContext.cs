@@ -19,7 +19,7 @@ public class DatabaseContext
         // Clear stale sound sentinel values left over from the old click/silent sound mode system.
         // These are not valid file paths — real sound buttons have an absolute path that File.Exists() confirms.
         await _connection.ExecuteAsync(
-            "UPDATE EasyButton SET SoundPath = NULL WHERE SoundPath IN ('click', 'silent')");
+            "UPDATE Buttons SET SoundPath = NULL WHERE SoundPath IN ('click', 'silent')");
         return _connection;
     }
 }
